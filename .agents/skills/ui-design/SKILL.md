@@ -11,7 +11,7 @@ This skill defines the visual language, design tokens, interaction patterns, and
 
 ## 1. Visual Direction & Aesthetic Philosophy
 
-Nexa is built as an **enterprise-grade, high-density, minimal SaaS**. The visual tone takes direct inspiration from world-class modern developer tools and financial platforms:
+Nexa is built as an **AI-powered business intelligence platform for SMBs**, utilizing an **enterprise-grade, high-density, minimal SaaS** aesthetic. The visual tone takes direct inspiration from world-class modern developer tools and financial platforms:
 
 * **Linear:** Snappy keyboard workflows, high visual density, crisp borders, dark surface depth.
 * **Vercel:** Monochromatic precision, high-contrast typography, minimalist borders, refined monochrome badges.

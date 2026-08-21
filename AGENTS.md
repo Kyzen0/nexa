@@ -11,7 +11,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 # Nexa — Project & Agent Guidelines
 
 ## 1. Project Overview
-Nexa is a **premium, minimal, enterprise-style SaaS platform**. It delivers high-density, performant, and polished workflows inspired by best-in-class product design (Linear, Vercel, Stripe).
+Nexa is an **AI-powered BUSINESS INTELLIGENCE platform for small and medium-sized businesses**. It delivers high-density, performant, and polished workflows inspired by best-in-class product design (Linear, Vercel, Stripe).
 
 ## 2. Core Technology Stack
 * **Framework:** Next.js (App Router, Server & Client Components)
@@ -34,6 +34,7 @@ Nexa is a **premium, minimal, enterprise-style SaaS platform**. It delivers high
 * **Micro-interactions:** Snappy, physics-based micro-animations (150ms–250ms duration) using Motion for layout transitions, modals, tooltips, and state updates.
 
 ### 🚫 Strictly Forbidden:
+* **No AI Infrastructure/DevOps concepts:** Agent fleet, Edge telemetry, SOC-2 infrastructure, P50/P99 latency, autonomous pipeline executions, infrastructure cluster health, multi-model routing, enterprise infrastructure contracts.
 * **No generic AI tropes:** Do not use rainbow gradients, neon mesh glows, overused glassmorphism with blur overload, floating multi-colored spheres, or oversized hero text with rainbow gradient clips.
 * **No decorative noise:** Avoid random accent colors, non-standard border radiuses, and gratuitous looping animations that distract from user tasks.
 
