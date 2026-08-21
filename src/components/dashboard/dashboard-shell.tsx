@@ -100,7 +100,7 @@ export const navItems: NavItem[] = [
   },
 ];
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export function DashboardShell({ children, unreadCount = 0 }: { children: React.ReactNode, unreadCount?: number }) {
   const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -194,6 +194,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 {categoryItems.map((item) => {
                   const isActive = pathname === item.href;
                   const Icon = item.icon;
+                  const displayBadge = item.title === "Notifications" && unreadCount > 0 ? unreadCount : item.badge;
                   return (
                     <Link
                       key={item.href}
@@ -217,7 +218,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                         <span className="truncate">{item.title}</span>
                       </div>
 
-                      {item.badge && (
+                      {displayBadge && (
                         <Badge
                           variant={
                             isActive
@@ -229,7 +230,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                             isActive && "bg-background/20 text-background border-transparent"
                           )}
                         >
-                          {item.badge}
+                          {displayBadge}
                         </Badge>
                       )}
                     </Link>
@@ -318,6 +319,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     {categoryItems.map((item) => {
                       const isActive = pathname === item.href;
                       const Icon = item.icon;
+                      const displayBadge = item.title === "Notifications" && unreadCount > 0 ? unreadCount : item.badge;
                       return (
                         <Link
                           key={item.href}
@@ -334,7 +336,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                             <Icon className="size-4 shrink-0" />
                             <span>{item.title}</span>
                           </div>
-                          {item.badge && (
+                          {displayBadge && (
                             <Badge
                               variant={
                                 isActive
@@ -343,7 +345,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                               }
                               size="sm"
                             >
-                              {item.badge}
+                              {displayBadge}
                             </Badge>
                           )}
                         </Link>
@@ -430,7 +432,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 aria-label="View notifications"
               >
                 <Bell className="size-4" />
-                <span className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-amber-500" />
+                {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-amber-500" />}
               </Button>
             </Link>
 

@@ -8,54 +8,58 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { createClient } from "@/lib/supabase/server";
 
-export default function NotificationsPage() {
-  const notifications = [
-    {
-      id: "notif-1",
-      title: "Inventory Alert: Artisan Coffee Blend is running low",
-      description: "Based on current sales velocity, you will run out of stock in approximately 4 days.",
-      type: "warning",
-      time: "10 mins ago",
-      read: false,
-      icon: PackageSearch,
-      badgeVariant: "warning" as const,
-      badgeText: "Reorder",
-    },
-    {
-      id: "notif-2",
-      title: "Goal Progress: Revenue Target at 85%",
-      description: "You are on track to hit your Q3 revenue goal of $1.5M. Keep it up!",
-      type: "success",
-      time: "1 hour ago",
-      read: false,
-      icon: CheckCircle2,
-      badgeVariant: "success" as const,
-      badgeText: "Milestone",
-    },
-    {
-      id: "notif-3",
-      title: "New Customer: Meridian Co. placed their first order",
-      description: "Meridian Co. just placed a wholesale order for $4,200.",
-      type: "info",
-      time: "3 hours ago",
-      read: false,
-      icon: Info,
-      badgeVariant: "brand" as const,
-      badgeText: "Sales",
-    },
-    {
-      id: "notif-4",
-      title: "Daily Report: Sales up 12% yesterday",
-      description: "Your daily sales report is ready. Revenue increased by 12% compared to the previous Tuesday.",
-      type: "info",
-      time: "Yesterday",
-      read: true,
-      icon: Info,
-      badgeVariant: "secondary" as const,
-      badgeText: "Report",
-    },
-  ];
+export default async function NotificationsPage() {
+  const supabase = await createClient();
+
+  const { data: notificationsData, error } = await supabase
+    .from('notifications')
+    .select('id, title, description, type, badge_text, is_read, created_at')
+    .order('created_at', { ascending: false });
+
+  const notifications = (notificationsData || []).map((notif) => {
+    let icon = Info;
+    let badgeVariant: "success" | "warning" | "brand" | "secondary" = "secondary";
+    
+    if (notif.type === "warning") {
+      icon = PackageSearch;
+      badgeVariant = "warning";
+    } else if (notif.type === "success") {
+      icon = CheckCircle2;
+      badgeVariant = "success";
+    } else if (notif.type === "info") {
+      icon = Info;
+      badgeVariant = notif.badge_text === "Sales" ? "brand" : "secondary";
+    }
+
+    const createdDate = new Date(notif.created_at);
+    const now = new Date();
+    const diffMs = Math.max(0, now.getTime() - createdDate.getTime());
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    let timeStr = "";
+    if (diffMins < 60) timeStr = `${diffMins || 1} mins ago`;
+    else if (diffHours < 24) timeStr = `${diffHours} hours ago`;
+    else if (diffDays === 1) timeStr = "Yesterday";
+    else timeStr = `${diffDays} days ago`;
+
+    return {
+      id: notif.id,
+      title: notif.title,
+      description: notif.description,
+      type: notif.type,
+      time: timeStr,
+      read: notif.is_read,
+      icon: icon,
+      badgeVariant: badgeVariant,
+      badgeText: notif.badge_text,
+    };
+  });
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <div className="space-y-6">
@@ -66,9 +70,11 @@ export default function NotificationsPage() {
             <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
               Activity & Alerts
             </h1>
-            <Badge variant="warning" size="sm">
-              3 Unread
-            </Badge>
+            {unreadCount > 0 && (
+              <Badge variant="warning" size="sm">
+                {unreadCount} Unread
+              </Badge>
+            )}
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
             Real-time notifications for inventory alerts, sales milestones, and automated insights.

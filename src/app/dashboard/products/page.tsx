@@ -9,54 +9,39 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { createClient } from "@/lib/supabase/server";
 
-export default function ProductsPage() {
-  const products = [
-    {
-      id: "prod-01",
-      name: "Artisan Coffee Blend",
-      type: "Consumables",
-      description: "Signature medium roast coffee beans sourced from Colombia.",
-      status: "Low Stock",
-      badgeVariant: "warning" as const,
-      monthlyVolume: "1,420 units/mo",
-      margin: "42%",
-      icon: ShoppingBag,
-    },
-    {
-      id: "prod-02",
-      name: "Ceramic Pour-Over Dripper",
-      type: "Equipment",
-      description: "Hand-crafted ceramic dripper for manual coffee brewing.",
-      status: "In Stock",
-      badgeVariant: "success" as const,
-      monthlyVolume: "450 units/mo",
-      margin: "58%",
-      icon: Package,
-    },
-    {
-      id: "prod-03",
-      name: "Double-Walled Glass Mug",
-      type: "Drinkware",
-      description: "Insulated glass mug that keeps beverages hot without burning hands.",
-      status: "Backordered",
-      badgeVariant: "brand" as const,
-      monthlyVolume: "820 units/mo",
-      margin: "65%",
-      icon: Boxes,
-    },
-    {
-      id: "prod-04",
-      name: "Electric Gooseneck Kettle",
-      type: "Electronics",
-      description: "Precision temperature control kettle for optimal extraction.",
-      status: "In Stock",
-      badgeVariant: "success" as const,
-      monthlyVolume: "125 units/mo",
-      margin: "35%",
-      icon: TrendingUp,
-    },
-  ];
+export default async function ProductsPage() {
+  const supabase = await createClient();
+
+  const { data: productsData, error } = await supabase
+    .from('products')
+    .select('id, name, category, description, status, monthly_sales_volume, margin_percentage')
+    .order('monthly_sales_volume', { ascending: false });
+
+  const products = (productsData || []).map((product) => {
+    let badgeVariant: "success" | "warning" | "brand" | "secondary" = "secondary";
+    if (product.status === "In Stock") badgeVariant = "success";
+    else if (product.status === "Low Stock") badgeVariant = "warning";
+    else if (product.status === "Backordered") badgeVariant = "brand";
+
+    let icon = Package;
+    if (product.category === "Consumables") icon = ShoppingBag;
+    else if (product.category === "Drinkware") icon = Boxes;
+    else if (product.category === "Electronics") icon = TrendingUp;
+
+    return {
+      id: product.id,
+      name: product.name,
+      type: product.category,
+      description: product.description,
+      status: product.status,
+      badgeVariant: badgeVariant,
+      monthlyVolume: `${product.monthly_sales_volume} units/mo`,
+      margin: `${product.margin_percentage}%`,
+      icon: icon,
+    };
+  });
 
   return (
     <div className="space-y-6">

@@ -10,50 +10,42 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { createClient } from "@/lib/supabase/server";
 
-export default function AICommandCenterPage() {
-  const agents = [
-    {
-      id: "agent-1",
-      name: "Revenue Anomaly Detector",
-      model: "Nexa Core",
-      status: "Running",
-      badgeVariant: "brand" as const,
-      task: "Monitoring daily sales against historical seasonal trends",
-      tokens: "248.5k",
-      latency: "185ms",
-    },
-    {
-      id: "agent-2",
-      name: "Inventory Optimizer",
-      model: "Nexa Fast",
-      status: "Completed",
-      badgeVariant: "success" as const,
-      task: "Generated reorder list based on projected weekend demand",
-      tokens: "82.1k",
-      latency: "112ms",
-    },
-    {
-      id: "agent-3",
-      name: "Customer Churn Predictor",
-      model: "Nexa Reasoning",
-      status: "Running",
-      badgeVariant: "brand" as const,
-      task: "Identifying high-value customers with declining purchase frequency",
-      tokens: "512.4k",
-      latency: "320ms",
-    },
-    {
-      id: "agent-4",
-      name: "Marketing ROI Analyzer",
-      model: "Nexa Lite",
-      status: "Standby",
-      badgeVariant: "secondary" as const,
-      task: "Attributing offline sales to recent email campaigns",
-      tokens: "12.9k",
-      latency: "94ms",
-    },
-  ];
+export default async function AICommandCenterPage() {
+  const supabase = await createClient();
+
+  const { data: insightsData, error } = await supabase
+    .from('ai_insights')
+    .select('id, name, model, task_description, status, tokens_used, latency_ms')
+    .order('created_at', { ascending: true });
+
+  const compactFormatter = new Intl.NumberFormat('en-US', { notation: "compact", maximumFractionDigits: 1 });
+
+  const insights = (insightsData || []).map((insight) => {
+    let badgeVariant: "success" | "warning" | "brand" | "secondary" = "secondary";
+    if (insight.status === "Running") badgeVariant = "brand";
+    else if (insight.status === "Completed") badgeVariant = "success";
+    else if (insight.status === "Failed") badgeVariant = "warning";
+    else if (insight.status === "Standby") badgeVariant = "secondary";
+
+    return {
+      id: insight.id,
+      name: insight.name,
+      model: insight.model,
+      status: insight.status,
+      badgeVariant: badgeVariant,
+      task: insight.task_description,
+      tokens: compactFormatter.format(insight.tokens_used),
+      latency: `${insight.latency_ms}ms`,
+      rawTokens: insight.tokens_used,
+    };
+  });
+
+  const activeTasksCount = insights.filter(i => i.status === "Running").length;
+  const totalTokensUsed = insights.reduce((sum, i) => sum + Number(i.rawTokens), 0);
+  
+  const formattedTokens = compactFormatter.format(totalTokensUsed);
 
   return (
     <div className="space-y-6">
@@ -90,7 +82,7 @@ export default function AICommandCenterPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription className="text-xs">Active Background Tasks</CardDescription>
-            <CardTitle className="text-2xl font-bold font-mono">4</CardTitle>
+            <CardTitle className="text-2xl font-bold font-mono">{activeTasksCount}</CardTitle>
           </CardHeader>
           <CardContent>
             <span className="text-[11px] text-muted-foreground">Monitoring data in real-time</span>
@@ -100,7 +92,7 @@ export default function AICommandCenterPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription className="text-xs">Data Points Analyzed</CardDescription>
-            <CardTitle className="text-2xl font-bold font-mono">1.42M</CardTitle>
+            <CardTitle className="text-2xl font-bold font-mono">{formattedTokens}</CardTitle>
           </CardHeader>
           <CardContent>
             <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">+150k this week</span>
@@ -113,6 +105,7 @@ export default function AICommandCenterPage() {
             <CardTitle className="text-2xl font-bold font-mono">98.4%</CardTitle>
           </CardHeader>
           <CardContent>
+            {/* TODO: Connect to user feedback / rating data model */}
             <span className="text-[11px] text-muted-foreground">Based on user feedback</span>
           </CardContent>
         </Card>
@@ -123,6 +116,7 @@ export default function AICommandCenterPage() {
             <CardTitle className="text-2xl font-bold font-mono">12</CardTitle>
           </CardHeader>
           <CardContent>
+            {/* TODO: Connect to generated recommendations data model */}
             <span className="text-[11px] text-muted-foreground">Generated this month</span>
           </CardContent>
         </Card>
@@ -208,7 +202,7 @@ export default function AICommandCenterPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
-                {agents.map((agent) => (
+                {insights.map((agent) => (
                   <tr key={agent.id} className="hover:bg-muted/30 transition-colors">
                     <td className="py-3 px-4 font-semibold text-foreground">
                       <div className="flex items-center gap-2">

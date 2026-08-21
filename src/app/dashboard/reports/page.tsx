@@ -7,50 +7,48 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { createClient } from "@/lib/supabase/server";
 
-export default function ReportsPage() {
-  const reports = [
-    {
-      id: "rep-001",
-      title: "Q2 2026 Financial Summary",
-      period: "Q2 2026",
-      generated: "Aug 18, 2026",
-      size: "4.2 MB",
-      format: "PDF",
-      status: "Finalized",
-      badgeVariant: "success" as const,
-    },
-    {
-      id: "rep-002",
-      title: "Monthly Sales by Channel",
-      period: "July 2026",
-      generated: "Aug 01, 2026",
-      size: "1.8 MB",
-      format: "CSV",
-      status: "Verified",
-      badgeVariant: "success" as const,
-    },
-    {
-      id: "rep-003",
-      title: "Inventory Valuation & Costs",
-      period: "July 2026",
-      generated: "Aug 01, 2026",
-      size: "890 KB",
-      format: "PDF",
-      status: "Draft",
-      badgeVariant: "secondary" as const,
-    },
-    {
-      id: "rep-004",
-      title: "Annual Revenue Growth Analysis",
-      period: "Annual 2025",
-      generated: "Jan 15, 2026",
-      size: "12.4 MB",
-      format: "PDF",
-      status: "Finalized",
-      badgeVariant: "success" as const,
-    },
-  ];
+export default async function ReportsPage() {
+  const supabase = await createClient();
+
+  const { data: reportsData, error } = await supabase
+    .from('reports')
+    .select('id, title, period, file_size_bytes, format, status, generated_at')
+    .order('generated_at', { ascending: false });
+
+  const formatBytes = (bytes: number, decimals = 1) => {
+    if (!+bytes) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+  };
+
+  const reports = (reportsData || []).map((report) => {
+    let badgeVariant: "success" | "warning" | "brand" | "secondary" = "secondary";
+    if (report.status === "Finalized" || report.status === "Verified") badgeVariant = "success";
+    else if (report.status === "Draft") badgeVariant = "secondary";
+    else if (report.status === "Generating") badgeVariant = "brand";
+    else if (report.status === "Failed") badgeVariant = "warning";
+
+    const generatedDate = new Date(report.generated_at);
+    // Use UTC date to avoid timezone issues shifting the date
+    const generatedStr = new Date(generatedDate.getTime() + Math.abs(generatedDate.getTimezoneOffset() * 60000))
+      .toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+
+    return {
+      id: report.id,
+      title: report.title,
+      period: report.period,
+      generated: generatedStr,
+      size: formatBytes(report.file_size_bytes),
+      format: report.format,
+      status: report.status,
+      badgeVariant: badgeVariant,
+    };
+  });
 
   return (
     <div className="space-y-6">
@@ -85,7 +83,7 @@ export default function ReportsPage() {
             </CardDescription>
           </div>
           <Badge variant="outline" size="sm">
-            4 Documents
+            {reports.length} Documents
           </Badge>
         </CardHeader>
 

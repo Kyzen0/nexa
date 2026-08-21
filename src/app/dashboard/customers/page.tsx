@@ -9,65 +9,50 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { createClient } from "@/lib/supabase/server";
 
-export default function CustomersPage() {
-  const customers = [
-    {
-      id: "cust-01",
-      name: "Solstice Retail Co.",
-      contact: "alice@solsticeretail.com",
-      tier: "Wholesale",
-      orders: 42,
-      ltv: "$28,000",
-      status: "Active",
-      badgeVariant: "success" as const,
-      joined: "Jan 2025",
-    },
-    {
-      id: "cust-02",
-      name: "Lumina Retail",
-      contact: "orders@luminaretail.com",
-      tier: "Retail Partner",
-      orders: 18,
-      ltv: "$16,400",
-      status: "Active",
-      badgeVariant: "success" as const,
-      joined: "Mar 2025",
-    },
-    {
-      id: "cust-03",
-      name: "Nova Roasters",
-      contact: "hello@novaroasters.io",
-      tier: "Wholesale",
-      orders: 95,
-      ltv: "$54,000",
-      status: "Active",
-      badgeVariant: "success" as const,
-      joined: "Nov 2024",
-    },
-    {
-      id: "cust-04",
-      name: "Atlas Supply",
-      contact: "purchasing@atlassupply.ai",
-      tier: "B2B Standard",
-      orders: 6,
-      ltv: "$4,800",
-      status: "At Risk",
-      badgeVariant: "warning" as const,
-      joined: "Aug 2026",
-    },
-    {
-      id: "cust-05",
-      name: "Meridian Co.",
-      contact: "billing@meridian.se",
-      tier: "Wholesale",
-      orders: 31,
-      ltv: "$19,500",
-      status: "Active",
-      badgeVariant: "success" as const,
-      joined: "May 2025",
-    },
-  ];
+export default async function CustomersPage() {
+  const supabase = await createClient();
+
+  const { data: customersData, error } = await supabase
+    .from('customers')
+    .select('id, name, contact_email, tier, status, joined_at, orders(amount)');
+
+  const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+
+  const customers = (customersData || []).map((cust) => {
+    let badgeVariant: "success" | "warning" | "destructive" | "secondary" = "secondary";
+    if (cust.status === "Active") badgeVariant = "success";
+    else if (cust.status === "At Risk") badgeVariant = "warning";
+    else if (cust.status === "Trial") badgeVariant = "secondary";
+
+    const ordersArr = cust.orders || [];
+    const ordersCount = Array.isArray(ordersArr) ? ordersArr.length : 0;
+    
+    let ltv = 0;
+    if (Array.isArray(ordersArr)) {
+      ltv = ordersArr.reduce((sum, order: any) => sum + Number(order.amount), 0);
+    }
+
+    const joinedDate = new Date(cust.joined_at);
+    // Use UTC date to avoid timezone issues shifting the date
+    const joinedStr = new Date(joinedDate.getTime() + Math.abs(joinedDate.getTimezoneOffset() * 60000))
+      .toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+
+    return {
+      id: cust.id,
+      name: cust.name,
+      contact: cust.contact_email,
+      tier: cust.tier,
+      orders: ordersCount,
+      ltv: currencyFormatter.format(ltv),
+      status: cust.status,
+      badgeVariant: badgeVariant,
+      joined: joinedStr,
+    };
+  });
+
+  const totalCustomers = customers.length;
 
   return (
     <div className="space-y-6">
@@ -99,7 +84,7 @@ export default function CustomersPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription className="text-xs">Total Customers</CardDescription>
-            <CardTitle className="text-2xl font-bold font-mono">1,248</CardTitle>
+            <CardTitle className="text-2xl font-bold font-mono">{totalCustomers}</CardTitle>
           </CardHeader>
           <CardContent>
             <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">+12% this quarter</span>
@@ -112,6 +97,7 @@ export default function CustomersPage() {
             <CardTitle className="text-2xl font-bold font-mono">42.5%</CardTitle>
           </CardHeader>
           <CardContent>
+            {/* TODO: Implement when historical cohort tracking is available */}
             <span className="text-[11px] text-muted-foreground">Industry avg is 28%</span>
           </CardContent>
         </Card>
@@ -122,6 +108,7 @@ export default function CustomersPage() {
             <CardTitle className="text-2xl font-bold font-mono">$1,850</CardTitle>
           </CardHeader>
           <CardContent>
+            {/* TODO: Implement when we build historical average trend tracking */}
             <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">+$140 vs last year</span>
           </CardContent>
         </Card>
@@ -132,6 +119,7 @@ export default function CustomersPage() {
             <CardTitle className="text-2xl font-bold font-mono">2.4%</CardTitle>
           </CardHeader>
           <CardContent>
+            {/* TODO: Implement once we have historical cancellation/churn data models */}
             <span className="text-[11px] text-muted-foreground">Healthy retention metrics</span>
           </CardContent>
         </Card>

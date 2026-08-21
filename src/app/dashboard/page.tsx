@@ -14,20 +14,60 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { createClient } from "@/lib/supabase/server";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const supabase = await createClient();
+
+  // Fetch recent orders
+  const { data: recentOrdersData, error: ordersError } = await supabase
+    .from('orders')
+    .select(`
+      id,
+      channel,
+      amount,
+      status,
+      created_at,
+      customers ( name )
+    `)
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  // Fetch all orders for KPIs (Total Revenue, Active Orders)
+  const { data: allOrdersData } = await supabase
+    .from('orders')
+    .select('amount, status');
+    
+  const totalRevenue = allOrdersData 
+    ? allOrdersData.reduce((sum, order) => sum + Number(order.amount), 0)
+    : 0;
+
+  const activeOrdersCount = allOrdersData
+    ? allOrdersData.filter(o => o.status === 'Processing' || o.status === 'Pending').length
+    : 0;
+
+  // Fetch trending products
+  const { data: topProductsData } = await supabase
+    .from('products')
+    .select('id, name, category, status, monthly_sales_volume')
+    .order('monthly_sales_volume', { ascending: false })
+    .limit(3);
+
+  // Formatting helpers
+  const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+
   const kpis = [
     {
       title: "Total Revenue",
-      value: "$124,500.00",
-      change: "+14.2%",
+      value: currencyFormatter.format(totalRevenue),
+      change: "+14.2%", // Static for now
       trend: "positive",
       description: "Across all integrated sales channels",
       icon: TrendingUp,
     },
     {
       title: "Net Margin",
-      value: "24.8%",
+      value: "24.8%", // TODO: Keep as static placeholder until cost tracking data model exists
       change: "+2.1%",
       trend: "positive",
       description: "Average margin after fulfillment",
@@ -35,15 +75,15 @@ export default function DashboardPage() {
     },
     {
       title: "Active Orders",
-      value: "342",
-      change: "+8.7%",
+      value: activeOrdersCount.toString(),
+      change: "+8.7%", // Static for now
       trend: "positive",
       description: "Currently processing or in transit",
       icon: ShoppingCart,
     },
     {
       title: "Inventory Health",
-      value: "98.2%",
+      value: "98.2%", // TODO: Keep as static placeholder until inventory aging data model exists
       change: "Nominal",
       trend: "neutral",
       description: "Products well-stocked against projected demand",
@@ -51,74 +91,53 @@ export default function DashboardPage() {
     },
   ];
 
-  const recentOrders = [
-    {
-      id: "ord_8f93a1c",
-      customer: "Alice V.",
-      channel: "Shopify (Online)",
-      amount: "$145.20",
-      status: "Fulfilled",
-      badgeVariant: "success" as const,
-      timestamp: "2 mins ago",
-    },
-    {
-      id: "ord_7c21e4b",
-      customer: "Michael B.",
-      channel: "POS (Retail)",
-      amount: "$42.50",
-      status: "Processing",
-      badgeVariant: "brand" as const,
-      timestamp: "Just now",
-    },
-    {
-      id: "ord_4a02d9f",
-      customer: "Sarah J.",
-      channel: "Shopify (Online)",
-      amount: "$820.00",
-      status: "Fulfilled",
-      badgeVariant: "success" as const,
-      timestamp: "12 mins ago",
-    },
-    {
-      id: "ord_1e84c7a",
-      customer: "David K.",
-      channel: "Amazon Marketplace",
-      amount: "$32.10",
-      status: "Pending",
-      badgeVariant: "warning" as const,
-      timestamp: "18 mins ago",
-    },
-    {
-      id: "ord_9b52f3e",
-      customer: "Emma W.",
-      channel: "Shopify (Online)",
-      amount: "$210.00",
-      status: "Fulfilled",
-      badgeVariant: "success" as const,
-      timestamp: "45 mins ago",
-    },
-  ];
+  const recentOrders = (recentOrdersData || []).map((order) => {
+    let badgeVariant: "success" | "warning" | "brand" | "secondary" | "destructive" = "secondary";
+    if (order.status === 'Fulfilled') badgeVariant = "success";
+    else if (order.status === 'Processing') badgeVariant = "brand";
+    else if (order.status === 'Pending') badgeVariant = "warning";
+    else if (order.status === 'Cancelled') badgeVariant = "destructive";
 
-  const topProducts = [
-    {
-      name: "Artisan Coffee Blend",
-      category: "Consumables",
-      status: "Low Stock",
-      velocity: "High",
-    },
-    {
-      name: "Ceramic Pour-Over Dripper",
-      category: "Equipment",
-      status: "In Stock",
-      velocity: "Medium",
-    },
-    {
-      name: "Double-Walled Glass Mug",
-      category: "Drinkware",
-      status: "In Stock",
-      velocity: "High",
-    },
-  ];
+    // Handle customer name extraction
+    let customerName = "Unknown";
+    if (order.customers) {
+      if (Array.isArray(order.customers)) {
+        customerName = order.customers[0]?.name || "Unknown";
+      } else {
+        customerName = (order.customers as any).name || "Unknown";
+      }
+    }
+
+    // Simplistic relative time formatting
+    const orderDate = new Date(order.created_at);
+    const now = new Date();
+    const diffMins = Math.round((now.getTime() - orderDate.getTime()) / 60000);
+    const timestamp = diffMins === 0 ? 'Just now' : `${diffMins} mins ago`;
+
+    return {
+      id: `ord_${order.id.substring(0, 7)}`,
+      customer: customerName,
+      channel: order.channel,
+      amount: currencyFormatter.format(Number(order.amount)),
+      status: order.status,
+      badgeVariant: badgeVariant,
+      timestamp: timestamp,
+    };
+  });
+
+  const topProducts = (topProductsData || []).map((product) => {
+    let velocity = "Medium";
+    if (product.monthly_sales_volume > 1000) velocity = "High";
+    else if (product.monthly_sales_volume < 200) velocity = "Low";
+
+    return {
+      id: product.id,
+      name: product.name,
+      category: product.category,
+      status: product.status,
+      velocity: velocity,
+    };
+  });
 
   return (
     <div className="space-y-6">
@@ -285,7 +304,7 @@ export default function DashboardPage() {
             <CardContent className="space-y-3">
               {topProducts.map((product) => (
                 <div
-                  key={product.name}
+                  key={product.id}
                   className="rounded-lg border border-border/80 bg-muted/20 p-3 text-xs space-y-1.5 hover:bg-muted/40 transition-colors"
                 >
                   <div className="flex items-center justify-between">

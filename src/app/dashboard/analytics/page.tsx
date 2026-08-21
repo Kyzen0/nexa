@@ -7,15 +7,39 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { createClient } from "@/lib/supabase/server";
 
-export default function AnalyticsPage() {
-  const channelData = [
-    { channel: "Shopify (Online Store)", orders: "12,450", revenue: "$1.2M", margin: "42%", growth: "+14%" },
-    { channel: "Amazon Marketplace", orders: "8,120", revenue: "$840K", margin: "28%", growth: "+8%" },
-    { channel: "Retail POS (Flagship)", orders: "3,400", revenue: "$320K", margin: "51%", growth: "-2%" },
-    { channel: "Instagram Shop", orders: "2,150", revenue: "$145K", margin: "38%", growth: "+22%" },
-    { channel: "Wholesale (B2B)", orders: "180", revenue: "$1.6M", margin: "22%", growth: "+5%" },
-  ];
+export default async function AnalyticsPage() {
+  const supabase = await createClient();
+
+  const { data: channelsData, error } = await supabase
+    .from('sales_channels')
+    .select('id, name, monthly_orders, gross_revenue, net_margin_percentage, growth_mom_percentage')
+    .order('gross_revenue', { ascending: false });
+
+  const channels = channelsData || [];
+
+  const totalGMV = channels.reduce((sum, channel) => sum + Number(channel.gross_revenue), 0);
+  const totalOrders = channels.reduce((sum, channel) => sum + Number(channel.monthly_orders), 0);
+  const aov = totalOrders > 0 ? totalGMV / totalOrders : 0;
+
+  const compactCurrency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact' });
+  const exactCurrency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+  const numberFormatter = new Intl.NumberFormat('en-US');
+
+  const channelRows = channels.map((channel) => {
+    return {
+      id: channel.id,
+      channel: channel.name,
+      orders: numberFormatter.format(channel.monthly_orders),
+      revenue: compactCurrency.format(Number(channel.gross_revenue)),
+      margin: `${channel.net_margin_percentage}%`,
+      growth: `${channel.growth_mom_percentage > 0 ? '+' : ''}${channel.growth_mom_percentage}%`,
+    };
+  });
+
+  const formattedTotalGMV = compactCurrency.format(totalGMV);
+  const formattedAOV = exactCurrency.format(aov);
 
   return (
     <div className="space-y-6">
@@ -47,7 +71,7 @@ export default function AnalyticsPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription className="text-xs">Total Gross Merchandise Value</CardDescription>
-            <CardTitle className="text-2xl font-bold font-mono">$4.2M</CardTitle>
+            <CardTitle className="text-2xl font-bold font-mono">{formattedTotalGMV}</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
             <span className="text-[11px] text-muted-foreground">Rolling 30 days</span>
@@ -61,6 +85,7 @@ export default function AnalyticsPage() {
             <CardTitle className="text-2xl font-bold font-mono">$24.50</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
+            {/* TODO: Connect to marketing/ad-spend data model when built */}
             <span className="text-[11px] text-muted-foreground">Blended across channels</span>
             <Badge variant="secondary" size="sm">-4.2%</Badge>
           </CardContent>
@@ -69,7 +94,7 @@ export default function AnalyticsPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription className="text-xs">Average Order Value (AOV)</CardDescription>
-            <CardTitle className="text-2xl font-bold font-mono">$145.20</CardTitle>
+            <CardTitle className="text-2xl font-bold font-mono">{formattedAOV}</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
             <span className="text-[11px] text-muted-foreground">Includes B2B wholesale</span>
@@ -83,6 +108,7 @@ export default function AnalyticsPage() {
             <CardTitle className="text-2xl font-bold font-mono">1.2%</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
+            {/* TODO: Connect to fulfillment/returns data model when built */}
             <span className="text-[11px] text-muted-foreground">Industry avg is 3.5%</span>
             <Badge variant="success" size="sm">Healthy</Badge>
           </CardContent>
@@ -101,7 +127,7 @@ export default function AnalyticsPage() {
             </CardDescription>
           </div>
           <Badge variant="outline" size="sm">
-            5 Active Channels
+            {channels.length} Active Channels
           </Badge>
         </CardHeader>
 
@@ -118,8 +144,8 @@ export default function AnalyticsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
-                {channelData.map((row) => (
-                  <tr key={row.channel} className="hover:bg-muted/30 transition-colors">
+                {channelRows.map((row) => (
+                  <tr key={row.id} className="hover:bg-muted/30 transition-colors">
                     <td className="py-3 px-4 font-medium text-foreground flex items-center gap-2">
                       <Store className="size-3.5 text-muted-foreground" />
                       <span>{row.channel}</span>
