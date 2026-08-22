@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" {...props}>
@@ -37,7 +37,17 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('deleted') === 'true') {
+        setIsDeleted(true);
+      }
+    }
+  }, []);
   const supabase = createClient();
 
   const handleGoogleLogin = async () => {
@@ -101,6 +111,13 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="px-6 sm:px-10 pb-10">
+          {isDeleted && (
+            <div className="flex items-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-500 bg-emerald-500/10 p-3 rounded-md mb-6">
+              <CheckCircle2 className="size-4 shrink-0" />
+              <p>Your account and all associated data have been permanently deleted.</p>
+            </div>
+          )}
+
           <Button variant="outline" className="w-full mb-6 h-10 text-[13px] font-medium border-border/60" onClick={handleGoogleLogin} disabled={loading} type="button">
             <GoogleIcon className="size-4 mr-2" />
             Continue with Google
@@ -129,7 +146,12 @@ export default function LoginPage() {
                 />
             </div>
             <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  <Link href="/forgot-password" className="text-[11px] font-medium text-muted-foreground hover:text-foreground underline-offset-4 hover:underline">
+                    Forgot password?
+                  </Link>
+                </div>
                 <Input
                   id="password"
                   type="password"

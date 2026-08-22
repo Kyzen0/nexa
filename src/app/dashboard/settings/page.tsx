@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/server";
+import { DangerZone } from "@/components/dashboard/settings/danger-zone";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -173,6 +174,9 @@ export default async function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Danger Zone */}
+      <DangerZone />
     </div>
   );
 }
