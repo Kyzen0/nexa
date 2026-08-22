@@ -27,6 +27,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { createClient } from "@/lib/supabase/client";
 import { LogOut } from "lucide-react";
 
@@ -289,9 +301,23 @@ export function DashboardShell({ children, unreadCount = 0, activeGoalsCount = 0
           </div>
           <div className="flex items-center gap-1">
             <ThemeToggle className="size-7" />
-            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground hover:text-foreground" onClick={handleLogout} title="Log out">
-              <LogOut className="size-3.5" />
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "size-7 text-muted-foreground hover:text-foreground")} title="Log out">
+                <LogOut className="size-3.5" />
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will end your current session and require you to sign in again.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleLogout}>Log out</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </aside>
@@ -390,9 +416,23 @@ export function DashboardShell({ children, unreadCount = 0, activeGoalsCount = 0
               </div>
               <div className="flex items-center gap-1">
                 <ThemeToggle />
-                <Button variant="ghost" size="icon" onClick={handleLogout} title="Log out">
-                  <LogOut className="size-4" />
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger className={buttonVariants({ variant: "ghost", size: "icon" })} title="Log out">
+                    <LogOut className="size-4" />
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will end your current session and require you to sign in again.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleLogout}>Log out</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           </aside>

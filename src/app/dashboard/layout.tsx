@@ -46,6 +46,10 @@ export default async function DashboardLayout({
 
   const workspaceName = (profile?.workspaces as any)?.name || "My Business";
 
+  if (workspaceName === "My Business") {
+    redirect("/onboarding");
+  }
+
   return (
     <DashboardShell 
       unreadCount={unreadCount || 0} 
