@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/server";
+import { CustomerAddButton } from "@/components/dashboard/customers/customer-add-button";
+import { CustomerRowActions } from "@/components/dashboard/customers/customer-row-actions";
 
 export default async function CustomersPage() {
   const supabase = await createClient();
@@ -72,10 +74,7 @@ export default async function CustomersPage() {
             <Download className="size-3.5" />
             <span>Export CSV</span>
           </Button>
-          <Button size="sm" className="gap-1.5 text-xs">
-            <Plus className="size-3.5" />
-            <span>Add Customer</span>
-          </Button>
+          <CustomerAddButton />
         </div>
       </div>
 
@@ -159,6 +158,7 @@ export default async function CustomersPage() {
                   <th className="py-2.5 px-4 font-medium">Lifetime Value</th>
                   <th className="py-2.5 px-4 font-medium">Status</th>
                   <th className="py-2.5 px-4 font-medium text-right hidden md:table-cell">Joined</th>
+                  <th className="py-2.5 px-4 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
@@ -189,6 +189,9 @@ export default async function CustomersPage() {
                     </td>
                     <td className="py-3 px-4 text-right font-mono text-muted-foreground text-[11px] hidden md:table-cell">
                       {org.joined}
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <CustomerRowActions customer={org} />
                     </td>
                   </tr>
                 ))}

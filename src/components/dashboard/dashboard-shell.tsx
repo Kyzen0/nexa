@@ -21,6 +21,7 @@ import {
   ArrowUpRight,
   ShieldCheck,
   Zap,
+  ShoppingCart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -78,6 +79,12 @@ export function DashboardShell({ children, unreadCount = 0, activeGoalsCount = 0
       title: "Customers",
       href: "/dashboard/customers",
       icon: Users,
+      category: "Operations",
+    },
+    {
+      title: "Orders",
+      href: "/dashboard/orders",
+      icon: ShoppingCart,
       category: "Operations",
     },
     {

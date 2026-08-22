@@ -222,7 +222,7 @@ export default async function DashboardPage() {
               </CardDescription>
             </div>
             <Link
-              href="/dashboard/analytics"
+              href="/dashboard/orders"
               className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 font-medium"
             >
               <span>View all orders</span>

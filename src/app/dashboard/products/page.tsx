@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
+import { ProductAddButton } from "@/components/dashboard/products/product-add-button";
+import { ProductRowActions } from "@/components/dashboard/products/product-row-actions";
 
 export default async function ProductsPage() {
   const supabase = await createClient();
@@ -57,10 +59,7 @@ export default async function ProductsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button size="sm" className="gap-1.5 text-xs">
-            <Plus className="size-3.5" />
-            <span>Add Product</span>
-          </Button>
+          <ProductAddButton />
         </div>
       </div>
 
@@ -85,9 +84,12 @@ export default async function ProductsPage() {
                       </span>
                     </div>
                   </div>
-                  <Badge variant={product.badgeVariant} size="sm">
-                    {product.status}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={product.badgeVariant} size="sm">
+                      {product.status}
+                    </Badge>
+                    <ProductRowActions product={(({ icon, ...rest }) => rest)(product)} />
+                  </div>
                 </div>
                 <CardDescription className="pt-2">
                   {product.description}
