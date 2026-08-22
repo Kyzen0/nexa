@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Cpu,
@@ -27,6 +27,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { createClient } from "@/lib/supabase/client";
+import { LogOut } from "lucide-react";
 
 export interface NavItem {
   title: string;
@@ -100,10 +102,18 @@ export const navItems: NavItem[] = [
   },
 ];
 
-export function DashboardShell({ children, unreadCount = 0 }: { children: React.ReactNode, unreadCount?: number }) {
+export function DashboardShell({ children, unreadCount = 0, activeGoalsCount = 0, userEmail }: { children: React.ReactNode, unreadCount?: number, activeGoalsCount?: number, userEmail?: string }) {
   const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const router = useRouter();
+  const supabase = createClient();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+    router.refresh();
+  };
 
   // Handle global ⌘K keyboard shortcut
   useEffect(() => {
@@ -194,7 +204,10 @@ export function DashboardShell({ children, unreadCount = 0 }: { children: React.
                 {categoryItems.map((item) => {
                   const isActive = pathname === item.href;
                   const Icon = item.icon;
-                  const displayBadge = item.title === "Notifications" && unreadCount > 0 ? unreadCount : item.badge;
+                  const displayBadge = 
+                    item.title === "Notifications" && unreadCount > 0 ? unreadCount : 
+                    item.title === "Goals" && activeGoalsCount > 0 ? `${activeGoalsCount} Active` : 
+                    item.badge;
                   return (
                     <Link
                       key={item.href}
@@ -266,14 +279,19 @@ export function DashboardShell({ children, unreadCount = 0 }: { children: React.
             <Avatar fallback="AV" size="sm" />
             <div className="flex flex-col min-w-0">
               <span className="truncate text-xs font-semibold text-foreground">
-                Alex Vance
+                {userEmail?.split('@')[0] || "User"}
               </span>
               <span className="truncate text-[10px] text-muted-foreground">
-                alex@nexa.dev
+                {userEmail || "user@example.com"}
               </span>
             </div>
           </div>
-          <ThemeToggle className="size-7" />
+          <div className="flex items-center gap-1">
+            <ThemeToggle className="size-7" />
+            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground hover:text-foreground" onClick={handleLogout} title="Log out">
+              <LogOut className="size-3.5" />
+            </Button>
+          </div>
         </div>
       </aside>
 
@@ -319,7 +337,10 @@ export function DashboardShell({ children, unreadCount = 0 }: { children: React.
                     {categoryItems.map((item) => {
                       const isActive = pathname === item.href;
                       const Icon = item.icon;
-                      const displayBadge = item.title === "Notifications" && unreadCount > 0 ? unreadCount : item.badge;
+                      const displayBadge = 
+                        item.title === "Notifications" && unreadCount > 0 ? unreadCount : 
+                        item.title === "Goals" && activeGoalsCount > 0 ? `${activeGoalsCount} Active` : 
+                        item.badge;
                       return (
                         <Link
                           key={item.href}
@@ -360,13 +381,18 @@ export function DashboardShell({ children, unreadCount = 0 }: { children: React.
               <div className="flex items-center gap-2">
                 <Avatar fallback="AV" size="sm" />
                 <div className="flex flex-col">
-                  <span className="text-xs font-medium">Alex Vance</span>
+                  <span className="text-xs font-medium">{userEmail?.split('@')[0] || "User"}</span>
                   <span className="text-[10px] text-muted-foreground">
-                    Admin
+                    {userEmail || "user@example.com"}
                   </span>
                 </div>
               </div>
-              <ThemeToggle />
+              <div className="flex items-center gap-1">
+                <ThemeToggle />
+                <Button variant="ghost" size="icon" onClick={handleLogout} title="Log out">
+                  <LogOut className="size-4" />
+                </Button>
+              </div>
             </div>
           </aside>
         </div>

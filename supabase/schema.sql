@@ -134,3 +134,13 @@ CREATE POLICY "Allow anon all operations on goals" ON goals FOR ALL TO anon USIN
 CREATE POLICY "Allow anon all operations on ai_insights" ON ai_insights FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "Allow anon all operations on notifications" ON notifications FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "Allow anon all operations on reports" ON reports FOR ALL TO anon USING (true) WITH CHECK (true);
+
+-- Allow authenticated users to perform all operations
+CREATE POLICY "Allow authenticated all operations on customers" ON customers FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow authenticated all operations on orders" ON orders FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow authenticated all operations on products" ON products FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow authenticated all operations on sales_channels" ON sales_channels FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow authenticated all operations on goals" ON goals FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow authenticated all operations on ai_insights" ON ai_insights FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow authenticated all operations on notifications" ON notifications FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow authenticated all operations on reports" ON reports FOR ALL TO authenticated USING (true) WITH CHECK (true);
