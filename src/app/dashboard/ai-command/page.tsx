@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/server";
+import { AICommandInput } from "@/components/dashboard/ai-command-input";
 
 export default async function AICommandCenterPage() {
   const supabase = await createClient();
@@ -122,52 +123,8 @@ export default async function AICommandCenterPage() {
         </Card>
       </div>
 
-      {/* Interactive Command Execution Box Mock */}
-      <Card className="border-border bg-card/80">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Terminal className="size-4 text-primary" />
-              <CardTitle className="text-sm font-semibold">
-                Ask Nexa AI
-              </CardTitle>
-            </div>
-            <span className="text-[11px] font-mono text-muted-foreground">
-              Powered by Advanced Analytics
-            </span>
-          </div>
-          <CardDescription>
-            Ask questions about your sales, customers, or inventory using plain English.
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className="space-y-3">
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Input
-              placeholder="e.g., What was our best-selling product last Friday?"
-              className="flex-1 font-mono text-xs bg-muted/30"
-              defaultValue="Analyze the impact of the weekend discount on overall margins."
-            />
-            <Button size="sm" className="gap-1.5 text-xs shrink-0">
-              <Sparkles className="size-3.5" />
-              <span>Generate Insight</span>
-            </Button>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-muted-foreground">
-            <span className="font-semibold text-foreground">Suggested Queries:</span>
-            <button className="rounded border border-border px-2 py-0.5 hover:bg-muted transition-colors">
-              Identify top 10 at-risk customers
-            </button>
-            <button className="rounded border border-border px-2 py-0.5 hover:bg-muted transition-colors">
-              Forecast next month&apos;s cash flow
-            </button>
-            <button className="rounded border border-border px-2 py-0.5 hover:bg-muted transition-colors">
-              Which products have excess inventory?
-            </button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Interactive Command Execution Box */}
+      <AICommandInput />
 
       {/* Active Agent Fleet Table */}
       <Card>
