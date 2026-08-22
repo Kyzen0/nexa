@@ -39,70 +39,71 @@ export interface NavItem {
   category: "Core" | "Operations" | "System";
 }
 
-export const navItems: NavItem[] = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-    category: "Core",
-  },
-  {
-    title: "AI Command Center",
-    href: "/dashboard/ai-command",
-    icon: Cpu,
-    badge: "Active",
-    badgeVariant: "brand",
-    category: "Core",
-  },
-  {
-    title: "Analytics",
-    href: "/dashboard/analytics",
-    icon: BarChart3,
-    category: "Core",
-  },
-  {
-    title: "Customers",
-    href: "/dashboard/customers",
-    icon: Users,
-    category: "Operations",
-  },
-  {
-    title: "Products",
-    href: "/dashboard/products",
-    icon: Package,
-    category: "Operations",
-  },
-  {
-    title: "Reports",
-    href: "/dashboard/reports",
-    icon: FileText,
-    category: "Operations",
-  },
-  {
-    title: "Goals",
-    href: "/dashboard/goals",
-    icon: Target,
-    badge: "4 Active",
-    badgeVariant: "secondary",
-    category: "Operations",
-  },
-  {
-    title: "Notifications",
-    href: "/dashboard/notifications",
-    icon: Bell,
-    badge: "3",
-    badgeVariant: "warning",
-    category: "System",
-  },
-  {
-    title: "Settings",
-    href: "/dashboard/settings",
-    icon: Settings,
-    category: "System",
-  },
-];
 
-export function DashboardShell({ children, unreadCount = 0, activeGoalsCount = 0, userEmail }: { children: React.ReactNode, unreadCount?: number, activeGoalsCount?: number, userEmail?: string }) {
+export function DashboardShell({ children, unreadCount = 0, activeGoalsCount = 0, userEmail, workspaceName = "My Business" }: { children: React.ReactNode, unreadCount?: number, activeGoalsCount?: number, userEmail?: string, workspaceName?: string }) {
+  const navItems: NavItem[] = [
+    {
+      title: "Dashboard",
+      href: "/dashboard",
+      icon: LayoutDashboard,
+      category: "Core",
+    },
+    {
+      title: "AI Command Center",
+      href: "/dashboard/ai-command",
+      icon: Cpu,
+      badge: "Active",
+      badgeVariant: "brand",
+      category: "Core",
+    },
+    {
+      title: "Analytics",
+      href: "/dashboard/analytics",
+      icon: BarChart3,
+      category: "Core",
+    },
+    {
+      title: "Customers",
+      href: "/dashboard/customers",
+      icon: Users,
+      category: "Operations",
+    },
+    {
+      title: "Products",
+      href: "/dashboard/products",
+      icon: Package,
+      category: "Operations",
+    },
+    {
+      title: "Reports",
+      href: "/dashboard/reports",
+      icon: FileText,
+      category: "Operations",
+    },
+    {
+      title: "Goals",
+      href: "/dashboard/goals",
+      icon: Target,
+      badge: activeGoalsCount > 0 ? `${activeGoalsCount} Active` : undefined,
+      badgeVariant: "secondary",
+      category: "Operations",
+    },
+    {
+      title: "Notifications",
+      href: "/dashboard/notifications",
+      icon: Bell,
+      badge: unreadCount > 0 ? unreadCount : undefined,
+      badgeVariant: "warning",
+      category: "System",
+    },
+    {
+      title: "Settings",
+      href: "/dashboard/settings",
+      icon: Settings,
+      category: "System",
+    },
+  ];
+
   const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -156,7 +157,7 @@ export function DashboardShell({ children, unreadCount = 0, activeGoalsCount = 0
             </div>
             <div className="flex flex-col">
               <span className="text-xs font-semibold tracking-tight text-foreground flex items-center gap-1.5">
-                Aura Goods
+                {workspaceName}
                 <span className="size-1.5 rounded-full bg-emerald-500" />
               </span>
               <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
@@ -311,7 +312,7 @@ export function DashboardShell({ children, unreadCount = 0, activeGoalsCount = 0
                   NX
                 </div>
                 <span className="text-sm font-semibold tracking-tight">
-                  Aura Goods
+                  {workspaceName}
                 </span>
               </div>
               <Button

@@ -10,8 +10,25 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { createClient } from "@/lib/supabase/server";
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let workspaceName = "My Business";
+  let workspaceSlug = "my-business";
+  
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('workspaces(name)')
+      .eq('id', user.id)
+      .single();
+    
+    workspaceName = (profile?.workspaces as any)?.name || "My Business";
+    workspaceSlug = workspaceName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+  }
   const apiKeys = [
     {
       id: "key-1",
@@ -60,13 +77,13 @@ export default function SettingsPage() {
               <label className="text-xs font-medium text-foreground">
                 Company Name
               </label>
-              <Input defaultValue="Aura Goods" />
+              <Input defaultValue={workspaceName} />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground">
                 Workspace Slug
               </label>
-              <Input defaultValue="aura-goods" className="font-mono" />
+              <Input defaultValue={workspaceSlug} className="font-mono" />
             </div>
           </div>
 
@@ -75,7 +92,7 @@ export default function SettingsPage() {
               <label className="text-xs font-medium text-foreground">
                 Admin Email
               </label>
-              <Input defaultValue="admin@auragoods.com" />
+              <Input defaultValue={user?.email || "admin@example.com"} disabled />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground">

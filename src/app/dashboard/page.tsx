@@ -56,6 +56,8 @@ export default async function DashboardPage() {
   // Formatting helpers
   const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
+  const hasData = (allOrdersData?.length ?? 0) > 0 || (topProductsData?.length ?? 0) > 0;
+
   const kpis = [
     {
       title: "Total Revenue",
@@ -67,10 +69,10 @@ export default async function DashboardPage() {
     },
     {
       title: "Net Margin",
-      value: "24.8%", // TODO: Keep as static placeholder until cost tracking data model exists
-      change: "+2.1%",
-      trend: "positive",
-      description: "Average margin after fulfillment",
+      value: hasData ? "24.8%" : "—", // TODO: Keep as static placeholder until cost tracking data model exists
+      change: hasData ? "+2.1%" : "-",
+      trend: hasData ? "positive" : "neutral",
+      description: hasData ? "Average margin after fulfillment" : "Add orders to see this",
       icon: Activity,
     },
     {
@@ -83,10 +85,10 @@ export default async function DashboardPage() {
     },
     {
       title: "Inventory Health",
-      value: "98.2%", // TODO: Keep as static placeholder until inventory aging data model exists
-      change: "Nominal",
+      value: hasData ? "98.2%" : "—", // TODO: Keep as static placeholder until inventory aging data model exists
+      change: hasData ? "Nominal" : "-",
       trend: "neutral",
-      description: "Products well-stocked against projected demand",
+      description: hasData ? "Products well-stocked against projected demand" : "Add products to see this",
       icon: ShieldCheck,
     },
   ];
