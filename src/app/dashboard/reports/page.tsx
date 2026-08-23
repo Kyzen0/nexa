@@ -97,39 +97,58 @@ export default async function ReportsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
-                {reports.map((report) => (
-                  <tr key={report.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="font-semibold text-foreground flex items-center gap-2">
-                        <FileText className="size-3.5 text-muted-foreground" />
-                        <span>{report.title}</span>
+                {reports.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-16 text-center">
+                      <div className="flex flex-col items-center justify-center space-y-3">
+                        <FileText className="size-8 text-muted-foreground/30" />
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium text-foreground">No reports generated</p>
+                          <p className="text-xs text-muted-foreground max-w-[250px] mx-auto leading-relaxed">
+                            Generate your first financial or operational report to see it archived here.
+                          </p>
+                        </div>
+                        <div className="pt-2">
+                          <ReportAddButton />
+                        </div>
                       </div>
-                      <span className="font-mono text-[10px] text-muted-foreground">
-                        Generated {report.generated} • {report.format}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 font-mono text-muted-foreground hidden sm:table-cell">
-                      {report.period}
-                    </td>
-                    <td className="py-3 px-4">
-                      <Badge variant={report.badgeVariant} size="sm">
-                        {report.status}
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4 font-mono text-muted-foreground hidden md:table-cell">
-                      {report.size}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <ReportRowActions report={{
-                        id: report.id,
-                        title: report.title,
-                        period: report.period,
-                        format: report.format,
-                        status: report.status
-                      }} />
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  reports.map((report) => (
+                    <tr key={report.id} className="hover:bg-muted/30 transition-colors">
+                      <td className="py-3 px-4">
+                        <div className="font-semibold text-foreground flex items-center gap-2">
+                          <FileText className="size-3.5 text-muted-foreground" />
+                          <span>{report.title}</span>
+                        </div>
+                        <span className="font-mono text-[10px] text-muted-foreground">
+                          Generated {report.generated} • {report.format}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 font-mono text-muted-foreground hidden sm:table-cell">
+                        {report.period}
+                      </td>
+                      <td className="py-3 px-4">
+                        <Badge variant={report.badgeVariant} size="sm">
+                          {report.status}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-4 font-mono text-muted-foreground hidden md:table-cell">
+                        {report.size}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <ReportRowActions report={{
+                          id: report.id,
+                          title: report.title,
+                          period: report.period,
+                          format: report.format,
+                          status: report.status
+                        }} />
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

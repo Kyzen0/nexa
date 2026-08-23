@@ -14,10 +14,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { GettingStartedChecklist } from "@/components/dashboard/getting-started-checklist";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('workspace_id')
+    .eq('id', user?.id)
+    .single();
+
+  const { count: customersCount } = await supabase.from('customers').select('*', { count: 'exact', head: true });
+  const { count: goalsCount } = await supabase.from('goals').select('*', { count: 'exact', head: true });
+  const { count: ordersCount } = await supabase.from('orders').select('*', { count: 'exact', head: true });
+  const { count: productsCount } = await supabase.from('products').select('*', { count: 'exact', head: true });
 
   // Fetch recent orders
   const { data: recentOrdersData, error: ordersError } = await supabase
@@ -203,6 +216,17 @@ export default async function DashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* Getting Started Checklist */}
+      {profile?.workspace_id && (
+        <GettingStartedChecklist 
+          workspaceId={profile.workspace_id}
+          customersCount={customersCount || 0}
+          productsCount={productsCount || 0}
+          ordersCount={ordersCount || 0}
+          goalsCount={goalsCount || 0}
+        />
+      )}
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

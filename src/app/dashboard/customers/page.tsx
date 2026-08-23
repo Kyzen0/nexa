@@ -185,39 +185,58 @@ export default async function CustomersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
-                {customers.map((org) => (
-                  <tr key={org.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="font-semibold text-foreground flex items-center gap-2">
-                        <Building2 className="size-3.5 text-muted-foreground" />
-                        <span>{org.name}</span>
+                {customers.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-16 text-center">
+                      <div className="flex flex-col items-center justify-center space-y-3">
+                        <Building2 className="size-8 text-muted-foreground/30" />
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium text-foreground">No customers yet</p>
+                          <p className="text-xs text-muted-foreground max-w-[250px] mx-auto leading-relaxed">
+                            Add your first customer to start tracking relationships and LTV.
+                          </p>
+                        </div>
+                        <div className="pt-2">
+                          <CustomerAddButton />
+                        </div>
                       </div>
-                      <div className="font-mono text-[10px] text-muted-foreground">
-                        {org.contact}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-muted-foreground hidden sm:table-cell">
-                      {org.tier}
-                    </td>
-                    <td className="py-3 px-4 font-mono text-foreground">
-                      {org.orders}
-                    </td>
-                    <td className="py-3 px-4 font-mono font-medium text-foreground">
-                      {org.ltv}
-                    </td>
-                    <td className="py-3 px-4">
-                      <Badge variant={org.badgeVariant} size="sm">
-                        {org.status}
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono text-muted-foreground text-[11px] hidden md:table-cell">
-                      {org.joined}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <CustomerRowActions customer={org} />
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  customers.map((org) => (
+                    <tr key={org.id} className="hover:bg-muted/30 transition-colors">
+                      <td className="py-3 px-4">
+                        <div className="font-semibold text-foreground flex items-center gap-2">
+                          <Building2 className="size-3.5 text-muted-foreground" />
+                          <span>{org.name}</span>
+                        </div>
+                        <div className="font-mono text-[10px] text-muted-foreground">
+                          {org.contact}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-muted-foreground hidden sm:table-cell">
+                        {org.tier}
+                      </td>
+                      <td className="py-3 px-4 font-mono text-foreground">
+                        {org.orders}
+                      </td>
+                      <td className="py-3 px-4 font-mono font-medium text-foreground">
+                        {org.ltv}
+                      </td>
+                      <td className="py-3 px-4">
+                        <Badge variant={org.badgeVariant} size="sm">
+                          {org.status}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono text-muted-foreground text-[11px] hidden md:table-cell">
+                        {org.joined}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <CustomerRowActions customer={org} />
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
