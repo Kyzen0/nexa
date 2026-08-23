@@ -1,9 +1,9 @@
 import React from "react";
 import {
-  Download,
   FileText,
-  Plus,
 } from "lucide-react";
+import { ReportAddButton } from "@/components/dashboard/reports/report-add-button";
+import { ReportRowActions } from "@/components/dashboard/reports/report-row-actions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -64,10 +64,7 @@ export default async function ReportsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button size="sm" className="gap-1.5 text-xs">
-            <Plus className="size-3.5" />
-            <span>Generate Report</span>
-          </Button>
+          <ReportAddButton />
         </div>
       </div>
 
@@ -123,10 +120,13 @@ export default async function ReportsPage() {
                       {report.size}
                     </td>
                     <td className="py-3 px-4 text-right">
-                      <Button variant="outline" size="xs" className="gap-1 font-mono text-[11px]">
-                        <Download className="size-3" />
-                        <span>Download</span>
-                      </Button>
+                      <ReportRowActions report={{
+                        id: report.id,
+                        title: report.title,
+                        period: report.period,
+                        format: report.format,
+                        status: report.status
+                      }} />
                     </td>
                   </tr>
                 ))}
