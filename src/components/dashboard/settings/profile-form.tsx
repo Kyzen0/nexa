@@ -256,14 +256,6 @@ export function ProfileForm({
           </div>
         )}
       </div>
-
-      {/* Currency Field */}
-      <div className="space-y-2">
-        <label className="text-xs font-medium text-foreground">
-          Base Currency
-        </label>
-        <Input defaultValue="USD ($)" disabled className="bg-muted/40" />
-      </div>
     </div>
   );
 }

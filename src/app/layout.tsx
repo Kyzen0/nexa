@@ -17,11 +17,18 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Nexa — Enterprise Intelligence & Workflow Orchestration",
+    default: "Nexa — AI Business Intelligence for SMBs",
     template: "%s | Nexa",
   },
-  description:
-    "Next-generation enterprise SaaS platform for autonomous agent orchestration, high-density telemetry, and real-time operational analytics.",
+  description: "Next-generation business intelligence and autonomous agent orchestration tailored for modern SMBs. Seamlessly connect your tools for real-time operational analytics.",
+  openGraph: {
+    title: "Nexa — AI Business Intelligence for SMBs",
+    description: "Next-generation business intelligence and autonomous agent orchestration tailored for modern SMBs. Seamlessly connect your tools for real-time operational analytics.",
+    type: "website",
+  },
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

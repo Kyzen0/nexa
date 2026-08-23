@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/server";
 import { CustomerAddButton } from "@/components/dashboard/customers/customer-add-button";
 import { CustomerRowActions } from "@/components/dashboard/customers/customer-row-actions";
+import { CustomerExportButton } from "@/components/dashboard/customers/customer-export-button";
 
 export default async function CustomersPage() {
   const supabase = await createClient();
@@ -90,10 +91,7 @@ export default async function CustomersPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-            <Download className="size-3.5" />
-            <span>Export CSV</span>
-          </Button>
+          <CustomerExportButton customers={customers} />
           <CustomerAddButton />
         </div>
       </div>

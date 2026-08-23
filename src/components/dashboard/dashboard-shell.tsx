@@ -279,16 +279,18 @@ export function DashboardShell({ children, unreadCount = 0, activeGoalsCount = 0
           <div className="rounded-lg border border-border/80 bg-muted/30 p-2.5 text-xs space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-medium text-muted-foreground flex items-center gap-1.5">
-                <ShieldCheck className="size-3.5 text-emerald-500" />
+                <div className="size-1.5 rounded-full bg-muted-foreground/60" />
                 Sync Status
               </span>
-              <span className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
-                Connected
+              <span className="font-mono text-[10px] text-muted-foreground font-semibold">
+                Not connected
               </span>
             </div>
             <div className="flex items-center justify-between text-[10px] text-muted-foreground font-mono">
-              <span>Last Sync: 2m ago</span>
-              <span>Shopify / QBO</span>
+              <span>Last Sync: --</span>
+              <Link href="/dashboard/settings" className="hover:text-foreground transition-colors hover:underline">
+                No integrations yet
+              </Link>
             </div>
           </div>
         </div>
