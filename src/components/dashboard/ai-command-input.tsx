@@ -40,6 +40,7 @@ export function AICommandInput() {
       }
 
       setResponse(data.response);
+      setQuestion("");
     } catch (err: any) {
       setError(err.message);
     } finally {

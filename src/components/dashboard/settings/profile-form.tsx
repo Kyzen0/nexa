@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Save, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Save, CheckCircle2, AlertCircle, Loader2, Edit2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { updateWorkspaceName } from "@/app/actions/workspace";
@@ -19,11 +19,13 @@ export function ProfileForm({
   const [email, setEmail] = useState(initialEmail);
   
   // State for workspace name update
+  const [isEditingName, setIsEditingName] = useState(false);
   const [isUpdatingName, setIsUpdatingName] = useState(false);
   const [nameSuccess, setNameSuccess] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
 
   // State for email update
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
   const [emailSuccess, setEmailSuccess] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
@@ -44,6 +46,7 @@ export function ProfileForm({
     try {
       await updateWorkspaceName(workspaceName.trim());
       setNameSuccess(true);
+      setIsEditingName(false);
       router.refresh(); // Ensure layout sidebar reflects the new name
       
       // Hide success message after 3 seconds
@@ -72,6 +75,7 @@ export function ProfileForm({
       if (error) throw error;
       
       setEmailSuccess(true);
+      setIsEditingEmail(false);
     } catch (error: any) {
       setEmailError(error.message || "Failed to update email");
     } finally {
@@ -87,29 +91,67 @@ export function ProfileForm({
     <div className="space-y-6">
       {/* Company Name Field */}
       <div className="space-y-2">
-        <label className="text-xs font-medium text-foreground">
-          Company Name
-        </label>
-        <div className="flex gap-2">
-          <Input 
-            value={workspaceName} 
-            onChange={(e) => {
-              setWorkspaceName(e.target.value);
-              setNameError(null);
-              setNameSuccess(false);
-            }} 
-            disabled={isUpdatingName}
-          />
-          <Button 
-            size="sm" 
-            className="shrink-0 gap-1.5" 
-            disabled={!hasNameChanged || isUpdatingName || !workspaceName.trim()}
-            onClick={handleUpdateName}
-          >
-            {isUpdatingName ? <Loader2 className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}
-            <span>Save</span>
-          </Button>
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-medium text-foreground">
+            Company Name
+          </label>
+          {!isEditingName && (
+            <Button 
+              variant="ghost" 
+              size="xs" 
+              className="h-6 gap-1 text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                setIsEditingName(true);
+                setNameSuccess(false);
+              }}
+            >
+              <Edit2 className="size-3" />
+              <span>Edit</span>
+            </Button>
+          )}
         </div>
+        
+        {isEditingName ? (
+          <div className="flex gap-2">
+            <Input 
+              value={workspaceName} 
+              onChange={(e) => {
+                setWorkspaceName(e.target.value);
+                setNameError(null);
+                setNameSuccess(false);
+              }} 
+              disabled={isUpdatingName}
+              autoFocus
+            />
+            <Button 
+              size="sm" 
+              className="shrink-0 gap-1.5" 
+              disabled={!hasNameChanged || isUpdatingName || !workspaceName.trim()}
+              onClick={handleUpdateName}
+            >
+              {isUpdatingName ? <Loader2 className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}
+              <span>Save</span>
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="shrink-0 px-2" 
+              disabled={isUpdatingName}
+              onClick={() => {
+                setIsEditingName(false);
+                setWorkspaceName(initialWorkspaceName);
+                setNameError(null);
+              }}
+            >
+              <X className="size-4" />
+            </Button>
+          </div>
+        ) : (
+          <div className="p-2.5 text-sm rounded-md border border-border/50 bg-muted/20 text-foreground font-medium">
+            {initialWorkspaceName}
+          </div>
+        )}
+        
         {nameError && (
           <p className="text-[11px] text-destructive flex items-center gap-1 mt-1">
             <AlertCircle className="size-3" /> {nameError}
@@ -137,30 +179,68 @@ export function ProfileForm({
 
       {/* Email Field */}
       <div className="space-y-2">
-        <label className="text-xs font-medium text-foreground">
-          Admin Email
-        </label>
-        <div className="flex gap-2">
-          <Input 
-            type="email"
-            value={email} 
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setEmailError(null);
-              setEmailSuccess(false);
-            }} 
-            disabled={isUpdatingEmail}
-          />
-          <Button 
-            size="sm" 
-            className="shrink-0 gap-1.5" 
-            disabled={!hasEmailChanged || isUpdatingEmail}
-            onClick={handleUpdateEmail}
-          >
-            {isUpdatingEmail ? <Loader2 className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}
-            <span>Save</span>
-          </Button>
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-medium text-foreground">
+            Admin Email
+          </label>
+          {!isEditingEmail && (
+            <Button 
+              variant="ghost" 
+              size="xs" 
+              className="h-6 gap-1 text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                setIsEditingEmail(true);
+                setEmailSuccess(false);
+              }}
+            >
+              <Edit2 className="size-3" />
+              <span>Edit</span>
+            </Button>
+          )}
         </div>
+        
+        {isEditingEmail ? (
+          <div className="flex gap-2">
+            <Input 
+              type="email"
+              value={email} 
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailError(null);
+                setEmailSuccess(false);
+              }} 
+              disabled={isUpdatingEmail}
+              autoFocus
+            />
+            <Button 
+              size="sm" 
+              className="shrink-0 gap-1.5" 
+              disabled={!hasEmailChanged || isUpdatingEmail}
+              onClick={handleUpdateEmail}
+            >
+              {isUpdatingEmail ? <Loader2 className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}
+              <span>Save</span>
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="shrink-0 px-2" 
+              disabled={isUpdatingEmail}
+              onClick={() => {
+                setIsEditingEmail(false);
+                setEmail(initialEmail);
+                setEmailError(null);
+              }}
+            >
+              <X className="size-4" />
+            </Button>
+          </div>
+        ) : (
+          <div className="p-2.5 text-sm rounded-md border border-border/50 bg-muted/20 text-foreground font-medium">
+            {initialEmail}
+          </div>
+        )}
+        
         {emailError && (
           <p className="text-[11px] text-destructive flex items-center gap-1 mt-1">
             <AlertCircle className="size-3" /> {emailError}

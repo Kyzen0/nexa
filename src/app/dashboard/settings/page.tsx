@@ -13,6 +13,9 @@ import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/server";
 import { DangerZone } from "@/components/dashboard/settings/danger-zone";
 import { ProfileForm } from "@/components/dashboard/settings/profile-form";
+import { SecuritySection } from "@/components/dashboard/settings/security-section";
+
+export const dynamic = 'force-dynamic';
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -21,15 +24,18 @@ export default async function SettingsPage() {
   let workspaceName = "My Business";
   let workspaceSlug = "my-business";
   
+  let hasPassword = false;
+  
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('workspaces(name)')
+      .select('workspaces(name), has_password')
       .eq('id', user.id)
       .single();
     
     workspaceName = (profile?.workspaces as any)?.name || "My Business";
     workspaceSlug = workspaceName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    hasPassword = profile?.has_password || false;
   }
   const apiKeys = [
     {
@@ -143,6 +149,9 @@ export default async function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Security Section */}
+      <SecuritySection hasPassword={hasPassword} />
 
       {/* Danger Zone */}
       <DangerZone />

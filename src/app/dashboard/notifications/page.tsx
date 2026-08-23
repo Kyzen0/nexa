@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
+import { MarkAllReadButton } from "@/components/dashboard/notifications/mark-all-read-button";
+import { Bell } from "lucide-react";
 
 export default async function NotificationsPage() {
   const supabase = await createClient();
@@ -82,61 +84,70 @@ export default async function NotificationsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-            <CheckCheck className="size-3.5" />
-            <span>Mark all as read</span>
-          </Button>
+          {unreadCount > 0 && <MarkAllReadButton />}
         </div>
       </div>
 
       {/* Notifications List */}
-      <div className="space-y-3">
-        {notifications.map((notif) => {
-          const Icon = notif.icon;
-          return (
-            <Card
-              key={notif.id}
-              className={`transition-colors ${
-                !notif.read
-                  ? "border-neutral-300 dark:border-neutral-700 bg-card"
-                  : "border-border/60 bg-muted/20 opacity-80"
-              }`}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 rounded-lg border border-border/80 bg-muted/50 p-2 text-foreground">
-                      <Icon className="size-4" />
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-foreground">
-                          {notif.title}
-                        </span>
-                        {!notif.read && (
-                          <span className="size-1.5 rounded-full bg-amber-500" />
-                        )}
+      {notifications.length === 0 ? (
+        <div className="flex flex-col items-center justify-center space-y-3 rounded-lg border border-dashed border-border py-24 bg-muted/10">
+          <Bell className="size-8 text-muted-foreground/30" />
+          <div className="space-y-1 text-center">
+            <p className="text-sm font-medium text-foreground">You have no new notifications</p>
+            <p className="text-xs text-muted-foreground max-w-[250px] mx-auto leading-relaxed">
+              We'll notify you here when there are important updates about your inventory or sales.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {notifications.map((notif) => {
+            const Icon = notif.icon;
+            return (
+              <Card
+                key={notif.id}
+                className={`transition-colors ${
+                  !notif.read
+                    ? "border-neutral-300 dark:border-neutral-700 bg-card"
+                    : "border-border/60 bg-muted/20 opacity-80"
+                }`}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 rounded-lg border border-border/80 bg-muted/50 p-2 text-foreground">
+                        <Icon className="size-4" />
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        {notif.description}
-                      </p>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-foreground">
+                            {notif.title}
+                          </span>
+                          {!notif.read && (
+                            <span className="size-1.5 rounded-full bg-amber-500" />
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {notif.description}
+                        </p>
+                      </div>
+                    </div>
+  
+                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                      <Badge variant={notif.badgeVariant} size="sm">
+                        {notif.badgeText}
+                      </Badge>
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        {notif.time}
+                      </span>
                     </div>
                   </div>
-
-                  <div className="flex flex-col items-end gap-1.5 shrink-0">
-                    <Badge variant={notif.badgeVariant} size="sm">
-                      {notif.badgeText}
-                    </Badge>
-                    <span className="font-mono text-[10px] text-muted-foreground">
-                      {notif.time}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

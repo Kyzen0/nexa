@@ -94,7 +94,7 @@ export function DangerZone() {
                     value={confirmationText}
                     onChange={(e) => setConfirmationText(e.target.value)}
                     placeholder="DELETE"
-                    className="font-mono uppercase h-9"
+                    className="font-mono h-9"
                   />
                 </div>
               </AlertDialogHeader>
