@@ -4,8 +4,11 @@ import { createClient } from '@/lib/supabase/server'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
+  const token_hash = searchParams.get('token_hash')
+  const type = searchParams.get('type')
   const next = searchParams.get('next') ?? '/dashboard'
 
+  // Handle PKCE Code Exchange (Signup, Login, etc.)
   if (code) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
@@ -13,6 +16,24 @@ export async function GET(request: Request) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`)
     }
+    
+    // Log error for debugging if exchange fails
+    console.error("Auth callback code exchange error:", error.message)
+  } 
+  // Handle OTP Verification (Email Change, etc. if token_hash is provided)
+  else if (token_hash && type) {
+    const supabase = await createClient()
+    const { error } = await supabase.auth.verifyOtp({ 
+      token_hash, 
+      type: type as any 
+    })
+    
+    if (!error) {
+      return NextResponse.redirect(`${origin}${next}`)
+    }
+    
+    // Log error for debugging if verify fails
+    console.error("Auth callback OTP verify error:", error.message)
   }
 
   return NextResponse.redirect(`${origin}/login?error=oauth_failed`)

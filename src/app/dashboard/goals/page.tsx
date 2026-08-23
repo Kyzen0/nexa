@@ -1,9 +1,7 @@
 import React from "react";
-import {
-  Plus,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { GoalAddButton } from "@/components/dashboard/goals/goal-add-button";
+import { GoalCardActions } from "@/components/dashboard/goals/goal-card-actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 
@@ -49,10 +47,7 @@ export default async function GoalsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button size="sm" className="gap-1.5 text-xs">
-            <Plus className="size-3.5" />
-            <span>Create Goal</span>
-          </Button>
+          <GoalAddButton />
         </div>
       </div>
 
@@ -66,13 +61,25 @@ export default async function GoalsPage() {
                   <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
                     {goal.category}
                   </span>
-                  <CardTitle className="text-sm font-semibold mt-1">
+                  <CardTitle className="text-sm font-semibold mt-1 pr-6">
                     {goal.title}
                   </CardTitle>
                 </div>
-                <Badge variant={goal.badgeVariant} size="sm">
-                  {goal.status}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant={goal.badgeVariant} size="sm">
+                    {goal.status}
+                  </Badge>
+                  <GoalCardActions goal={{
+                    id: goal.id,
+                    title: goal.title,
+                    category: goal.category,
+                    target: goal.target,
+                    current: goal.current,
+                    progress: goal.progress,
+                    status: goal.status,
+                    deadline: goal.deadline,
+                  }} />
+                </div>
               </div>
             </CardHeader>
 

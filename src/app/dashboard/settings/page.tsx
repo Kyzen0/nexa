@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/server";
 import { DangerZone } from "@/components/dashboard/settings/danger-zone";
+import { ProfileForm } from "@/components/dashboard/settings/profile-form";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -72,43 +73,11 @@ export default async function SettingsPage() {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground">
-                Company Name
-              </label>
-              <Input defaultValue={workspaceName} />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground">
-                Workspace Slug
-              </label>
-              <Input defaultValue={workspaceSlug} className="font-mono" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground">
-                Admin Email
-              </label>
-              <Input defaultValue={user?.email || "admin@example.com"} disabled />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground">
-                Base Currency
-              </label>
-              <Input defaultValue="USD ($)" disabled className="bg-muted/40" />
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-2">
-            <Button size="sm" className="gap-1.5 text-xs">
-              <Save className="size-3.5" />
-              <span>Save Changes</span>
-            </Button>
-          </div>
+        <CardContent>
+          <ProfileForm 
+            initialWorkspaceName={workspaceName} 
+            initialEmail={user?.email || ""} 
+          />
         </CardContent>
       </Card>
 

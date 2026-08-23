@@ -47,6 +47,7 @@ export default async function CustomersPage() {
       contact: cust.contact_email,
       tier: cust.tier,
       orders: ordersCount,
+      rawLtv: ltv,
       ltv: currencyFormatter.format(ltv),
       status: cust.status,
       badgeVariant: badgeVariant,
@@ -55,6 +56,25 @@ export default async function CustomersPage() {
   });
 
   const totalCustomers = customers.length;
+  const customersWithOrders = customers.filter(c => c.orders > 0);
+  const customersWithRepeatOrders = customers.filter(c => c.orders > 1);
+  
+  // Calculate Repeat Purchase Rate
+  const repeatPurchaseRate = customersWithOrders.length > 0
+    ? ((customersWithRepeatOrders.length / customersWithOrders.length) * 100).toFixed(1) + "%"
+    : "—";
+
+  // Calculate Average Lifetime Value
+  const avgLtvValue = customersWithOrders.length > 0
+    ? customersWithOrders.reduce((sum, c) => sum + c.rawLtv, 0) / customersWithOrders.length
+    : 0;
+  const avgLtv = customersWithOrders.length > 0 ? currencyFormatter.format(avgLtvValue) : "—";
+
+  // Calculate Churn Rate
+  const atRiskCustomers = customers.filter(c => c.status === "At Risk").length;
+  const churnRate = totalCustomers > 0
+    ? ((atRiskCustomers / totalCustomers) * 100).toFixed(1) + "%"
+    : "—";
 
   return (
     <div className="space-y-6">
@@ -86,40 +106,43 @@ export default async function CustomersPage() {
             <CardTitle className="text-2xl font-bold font-mono">{totalCustomers}</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">+12% this quarter</span>
+            <span className="text-[11px] text-muted-foreground">All registered accounts</span>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
             <CardDescription className="text-xs">Repeat Purchase Rate</CardDescription>
-            <CardTitle className="text-2xl font-bold font-mono">42.5%</CardTitle>
+            <CardTitle className="text-2xl font-bold font-mono">{repeatPurchaseRate}</CardTitle>
           </CardHeader>
           <CardContent>
-            {/* TODO: Implement when historical cohort tracking is available */}
-            <span className="text-[11px] text-muted-foreground">Industry avg is 28%</span>
+            <span className="text-[11px] text-muted-foreground">
+              {customersWithOrders.length === 0 ? "No orders yet" : "Customers with >1 order"}
+            </span>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
             <CardDescription className="text-xs">Average Lifetime Value</CardDescription>
-            <CardTitle className="text-2xl font-bold font-mono">$1,850</CardTitle>
+            <CardTitle className="text-2xl font-bold font-mono">{avgLtv}</CardTitle>
           </CardHeader>
           <CardContent>
-            {/* TODO: Implement when we build historical average trend tracking */}
-            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">+$140 vs last year</span>
+            <span className="text-[11px] text-muted-foreground">
+              {customersWithOrders.length === 0 ? "No orders yet" : "Avg total spend per active customer"}
+            </span>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
             <CardDescription className="text-xs">Customer Churn Rate</CardDescription>
-            <CardTitle className="text-2xl font-bold font-mono">2.4%</CardTitle>
+            <CardTitle className="text-2xl font-bold font-mono">{churnRate}</CardTitle>
           </CardHeader>
           <CardContent>
-            {/* TODO: Implement once we have historical cancellation/churn data models */}
-            <span className="text-[11px] text-muted-foreground">Healthy retention metrics</span>
+            <span className="text-[11px] text-muted-foreground">
+              {totalCustomers === 0 ? "No customers yet" : "Based on 'At Risk' status"}
+            </span>
           </CardContent>
         </Card>
       </div>

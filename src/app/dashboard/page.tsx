@@ -53,10 +53,42 @@ export default async function DashboardPage() {
     .order('monthly_sales_volume', { ascending: false })
     .limit(3);
 
+  // Fetch all products for KPIs
+  const { data: allProductsData } = await supabase
+    .from('products')
+    .select('status, margin_percentage, monthly_sales_volume');
+
   // Formatting helpers
   const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
-  const hasData = (allOrdersData?.length ?? 0) > 0 || (topProductsData?.length ?? 0) > 0;
+  const hasOrdersData = (allOrdersData?.length ?? 0) > 0;
+  const hasProductsData = (allProductsData?.length ?? 0) > 0;
+
+  // Calculate Net Margin
+  let netMarginValue = "—";
+  if (hasProductsData) {
+    let totalMarginVolume = 0;
+    let totalSalesVolume = 0;
+    
+    allProductsData!.forEach(p => {
+      const volume = Number(p.monthly_sales_volume) || 0;
+      const margin = Number(p.margin_percentage) || 0;
+      totalMarginVolume += margin * volume;
+      totalSalesVolume += volume;
+    });
+
+    if (totalSalesVolume > 0) {
+      netMarginValue = (totalMarginVolume / totalSalesVolume).toFixed(1) + "%";
+    }
+  }
+
+  // Calculate Inventory Health
+  let inventoryHealthValue = "—";
+  if (hasProductsData) {
+    const totalProducts = allProductsData!.length;
+    const inStockProducts = allProductsData!.filter(p => p.status === 'In Stock').length;
+    inventoryHealthValue = ((inStockProducts / totalProducts) * 100).toFixed(1) + "%";
+  }
 
   const kpis = [
     {
@@ -69,10 +101,10 @@ export default async function DashboardPage() {
     },
     {
       title: "Net Margin",
-      value: hasData ? "24.8%" : "—", // TODO: Keep as static placeholder until cost tracking data model exists
-      change: hasData ? "+2.1%" : "-",
-      trend: hasData ? "positive" : "neutral",
-      description: hasData ? "Average margin after fulfillment" : "Add orders to see this",
+      value: hasProductsData && netMarginValue !== "—" ? netMarginValue : "—",
+      change: null, // Removed static badge
+      trend: "neutral",
+      description: hasProductsData && netMarginValue !== "—" ? "Weighted avg across all products" : "Add products with sales volume",
       icon: Activity,
     },
     {
@@ -85,10 +117,10 @@ export default async function DashboardPage() {
     },
     {
       title: "Inventory Health",
-      value: hasData ? "98.2%" : "—", // TODO: Keep as static placeholder until inventory aging data model exists
-      change: hasData ? "Nominal" : "-",
+      value: hasProductsData ? inventoryHealthValue : "—",
+      change: null, // Removed static badge
       trend: "neutral",
-      description: hasData ? "Products well-stocked against projected demand" : "Add products to see this",
+      description: hasProductsData ? "Products currently 'In Stock'" : "Add products to see this",
       icon: ShieldCheck,
     },
   ];
@@ -191,13 +223,15 @@ export default async function DashboardPage() {
                   <span className="text-2xl font-bold tracking-tight font-mono text-foreground">
                     {kpi.value}
                   </span>
-                  <Badge
-                    variant={kpi.trend === "positive" ? "success" : "secondary"}
-                    size="sm"
-                    className="font-mono"
-                  >
-                    {kpi.change}
-                  </Badge>
+                  {kpi.change && (
+                    <Badge
+                      variant={kpi.trend === "positive" ? "success" : "secondary"}
+                      size="sm"
+                      className="font-mono"
+                    >
+                      {kpi.change}
+                    </Badge>
+                  )}
                 </div>
                 <p className="text-[11px] text-muted-foreground leading-tight">
                   {kpi.description}
