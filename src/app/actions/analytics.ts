@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
-export async function addCustomer(data: { name: string; contact_email: string; tier: string; status: string; joined_at: string }) {
+export async function addChannel(data: { name: string; monthly_orders: number; gross_revenue: number; net_margin_percentage: number; growth_mom_percentage: number }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
@@ -22,7 +22,7 @@ export async function addCustomer(data: { name: string; contact_email: string; t
   }
 
   const { error } = await supabase
-    .from('customers')
+    .from('sales_channels')
     .insert([
       {
         ...data,
@@ -34,11 +34,11 @@ export async function addCustomer(data: { name: string; contact_email: string; t
     return { error: error.message };
   }
 
-  revalidatePath('/dashboard/customers');
+  revalidatePath('/dashboard/analytics');
   return { success: true };
 }
 
-export async function updateCustomer(id: string, data: { name: string; contact_email: string; tier: string; status: string; joined_at: string }) {
+export async function updateChannel(id: string, data: { name: string; monthly_orders: number; gross_revenue: number; net_margin_percentage: number; growth_mom_percentage: number }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
@@ -46,14 +46,8 @@ export async function updateCustomer(id: string, data: { name: string; contact_e
     return { error: "Not authenticated" };
   }
 
-  const { data: currentCustomer } = await supabase
-    .from('customers')
-    .select('status, workspace_id')
-    .eq('id', id)
-    .single();
-
   const { error } = await supabase
-    .from('customers')
+    .from('sales_channels')
     .update(data)
     .eq('id', id);
 
@@ -61,24 +55,11 @@ export async function updateCustomer(id: string, data: { name: string; contact_e
     return { error: error.message };
   }
 
-  if (currentCustomer) {
-    if (data.status === "At Risk" && currentCustomer.status !== "At Risk") {
-      await supabase.from('notifications').insert([{
-        workspace_id: currentCustomer.workspace_id,
-        title: `Customer at risk: ${data.name}`,
-        description: "This customer's status was updated to At Risk — consider reaching out.",
-        type: "warning",
-        badge_text: "Review",
-        is_read: false
-      }]);
-    }
-  }
-
-  revalidatePath('/dashboard/customers');
+  revalidatePath('/dashboard/analytics');
   return { success: true };
 }
 
-export async function deleteCustomer(id: string) {
+export async function deleteChannel(id: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
@@ -87,7 +68,7 @@ export async function deleteCustomer(id: string) {
   }
 
   const { error } = await supabase
-    .from('customers')
+    .from('sales_channels')
     .delete()
     .eq('id', id);
 
@@ -95,6 +76,6 @@ export async function deleteCustomer(id: string) {
     return { error: error.message };
   }
 
-  revalidatePath('/dashboard/customers');
+  revalidatePath('/dashboard/analytics');
   return { success: true };
 }

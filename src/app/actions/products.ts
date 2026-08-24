@@ -46,6 +46,12 @@ export async function updateProduct(id: string, data: { name: string; category: 
     return { error: "Not authenticated" };
   }
 
+  const { data: currentProduct } = await supabase
+    .from('products')
+    .select('status, workspace_id')
+    .eq('id', id)
+    .single();
+
   const { error } = await supabase
     .from('products')
     .update(data)
@@ -53,6 +59,19 @@ export async function updateProduct(id: string, data: { name: string; category: 
 
   if (error) {
     return { error: error.message };
+  }
+
+  if (currentProduct) {
+    if ((data.status === "Low Stock" || data.status === "Backordered") && currentProduct.status !== data.status) {
+      await supabase.from('notifications').insert([{
+        workspace_id: currentProduct.workspace_id,
+        title: `Inventory Alert: ${data.name} is ${data.status === 'Low Stock' ? 'running low' : 'backordered'}`,
+        description: `The status of ${data.name} was updated to ${data.status}.`,
+        type: "warning",
+        badge_text: "Reorder",
+        is_read: false
+      }]);
+    }
   }
 
   revalidatePath('/dashboard/products');

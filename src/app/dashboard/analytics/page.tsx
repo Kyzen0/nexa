@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
+import { ChannelAddButton } from "@/components/dashboard/analytics/channel-add-button";
+import { ChannelDirectory } from "@/components/dashboard/analytics/channel-directory";
 
 export default async function AnalyticsPage() {
   const supabase = await createClient();
@@ -25,18 +27,9 @@ export default async function AnalyticsPage() {
 
   const compactCurrency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact' });
   const exactCurrency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-  const numberFormatter = new Intl.NumberFormat('en-US');
 
-  const channelRows = channels.map((channel) => {
-    return {
-      id: channel.id,
-      channel: channel.name,
-      orders: numberFormatter.format(channel.monthly_orders),
-      revenue: compactCurrency.format(Number(channel.gross_revenue)),
-      margin: `${channel.net_margin_percentage}%`,
-      growth: `${channel.growth_mom_percentage > 0 ? '+' : ''}${channel.growth_mom_percentage}%`,
-    };
-  });
+
+  const numberFormatter = new Intl.NumberFormat('en-US');
 
   const formattedTotalGMV = compactCurrency.format(totalGMV);
   const formattedAOV = exactCurrency.format(aov);
@@ -63,6 +56,7 @@ export default async function AnalyticsPage() {
             <Download className="size-3.5" />
             <span>Export CSV</span>
           </Button>
+          <ChannelAddButton />
         </div>
       </div>
 
@@ -116,53 +110,7 @@ export default async function AnalyticsPage() {
       </div>
 
       {/* Regional Edge Telemetry Table -> Channel Performance Table */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-sm font-semibold">
-              Sales Channel Performance
-            </CardTitle>
-            <CardDescription>
-              Revenue breakdown and margin analysis by channel
-            </CardDescription>
-          </div>
-          <Badge variant="outline" size="sm">
-            {channels.length} Active Channels
-          </Badge>
-        </CardHeader>
-
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-y border-border bg-muted/20 text-muted-foreground">
-                  <th className="py-2.5 px-4 font-medium">Sales Channel</th>
-                  <th className="py-2.5 px-4 font-medium">Monthly Orders</th>
-                  <th className="py-2.5 px-4 font-medium">Gross Revenue</th>
-                  <th className="py-2.5 px-4 font-medium">Net Margin</th>
-                  <th className="py-2.5 px-4 font-medium text-right">Growth (MoM)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                {channelRows.map((row) => (
-                  <tr key={row.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-4 font-medium text-foreground flex items-center gap-2">
-                      <Store className="size-3.5 text-muted-foreground" />
-                      <span>{row.channel}</span>
-                    </td>
-                    <td className="py-3 px-4 font-mono text-foreground">{row.orders}</td>
-                    <td className="py-3 px-4 font-mono text-muted-foreground">{row.revenue}</td>
-                    <td className="py-3 px-4 font-mono text-foreground">{row.margin}</td>
-                    <td className="py-3 px-4 text-right font-mono text-emerald-600 dark:text-emerald-400">
-                      {row.growth}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+      <ChannelDirectory channels={channels} />
     </div>
   );
 }

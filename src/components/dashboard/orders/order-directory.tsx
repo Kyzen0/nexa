@@ -22,7 +22,7 @@ interface OrderData {
   date: string;
 }
 
-export function OrderDirectory({ orders, customers }: { orders: OrderData[], customers: any[] }) {
+export function OrderDirectory({ orders, customers, channels }: { orders: OrderData[], customers: any[], channels: any[] }) {
   const [query, setQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
@@ -95,7 +95,7 @@ export function OrderDirectory({ orders, customers }: { orders: OrderData[], cus
                         </p>
                       </div>
                       <div className="pt-2">
-                        <OrderAddButton customers={customers} />
+                        <OrderAddButton customers={customers} channels={channels} />
                       </div>
                     </div>
                   </td>
@@ -144,7 +144,7 @@ export function OrderDirectory({ orders, customers }: { orders: OrderData[], cus
                         {order.date}
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <OrderRowActions order={orderDataToClient} customers={customers} />
+                        <OrderRowActions order={orderDataToClient} customers={customers} channels={channels} />
                       </td>
                     </tr>
                   );

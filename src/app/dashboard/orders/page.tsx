@@ -17,6 +17,14 @@ export default async function OrdersPage() {
     
   const customers = customersData || [];
 
+  // Fetch all sales channels for the dropdown
+  const { data: channelsData } = await supabase
+    .from('sales_channels')
+    .select('id, name')
+    .order('name', { ascending: true });
+    
+  const channels = channelsData || [];
+
   // Fetch all orders
   const { data: ordersData, error } = await supabase
     .from('orders')
@@ -86,11 +94,11 @@ export default async function OrdersPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <OrderAddButton customers={customers} />
+          <OrderAddButton customers={customers} channels={channels} />
         </div>
       </div>
       {/* Orders Directory Table */}
-      <OrderDirectory orders={orders} customers={customers} />
+      <OrderDirectory orders={orders} customers={customers} channels={channels} />
     </div>
   );
 }

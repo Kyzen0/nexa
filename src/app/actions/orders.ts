@@ -34,6 +34,24 @@ export async function addOrder(data: { customer_id: string; channel: string; amo
     return { error: error.message };
   }
 
+  const { data: customer } = await supabase
+    .from('customers')
+    .select('name')
+    .eq('id', data.customer_id)
+    .single();
+
+  const customerName = customer?.name || "Customer";
+  const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(data.amount);
+
+  await supabase.from('notifications').insert([{
+    workspace_id: profile.workspace_id,
+    title: `New order from ${customerName}`,
+    description: `A new order for ${formattedAmount} was placed.`,
+    type: "info",
+    badge_text: "Sales",
+    is_read: false
+  }]);
+
   revalidatePath('/dashboard/orders');
   revalidatePath('/dashboard');
   return { success: true };

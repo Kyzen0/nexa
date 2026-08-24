@@ -10,11 +10,13 @@ import { X, Loader2 } from "lucide-react";
 export function OrderDialog({ 
   order, 
   customers,
+  channels,
   open, 
   onOpenChange 
 }: { 
   order?: any;
   customers: { id: string; name: string }[];
+  channels: { id: string; name: string }[];
   open: boolean; 
   onOpenChange: (open: boolean) => void;
 }) {
@@ -40,14 +42,14 @@ export function OrderDialog({
       } else {
         setFormData({
           customer_id: customers.length > 0 ? customers[0].id : "",
-          channel: "",
+          channel: channels.length > 0 ? channels[0].name : "",
           amount: 0,
           status: "Pending"
         });
       }
       setError(null);
     }
-  }, [open, order, customers]);
+  }, [open, order, customers, channels]);
 
   if (!open) return null;
 
@@ -113,14 +115,35 @@ export function OrderDialog({
 
           <div className="space-y-2">
             <Label htmlFor="channel">Channel</Label>
-            <Input 
-              id="channel" 
-              required
-              placeholder="e.g. Shopify (Online), Retail POS..."
-              value={formData.channel} 
-              onChange={(e) => setFormData({...formData, channel: e.target.value})} 
-              className="h-10"
-            />
+            {channels.length === 0 ? (
+              <>
+                <Input 
+                  id="channel" 
+                  required
+                  placeholder="e.g. Shopify (Online), Retail POS..."
+                  value={formData.channel} 
+                  onChange={(e) => setFormData({...formData, channel: e.target.value})} 
+                  className="h-10"
+                />
+                <p className="text-[10px] text-muted-foreground">No sales channels yet — add one in Analytics first.</p>
+              </>
+            ) : (
+              <select 
+                id="channel" 
+                required
+                value={formData.channel} 
+                onChange={(e) => setFormData({...formData, channel: e.target.value})} 
+                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 appearance-none [&>option]:bg-background [&>option]:text-foreground"
+              >
+                <option value="" disabled>Select a channel...</option>
+                {channels.map((c) => (
+                  <option key={c.id} value={c.name}>{c.name}</option>
+                ))}
+                {formData.channel && !channels.some(c => c.name === formData.channel) && (
+                  <option value={formData.channel}>{formData.channel} (Legacy)</option>
+                )}
+              </select>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

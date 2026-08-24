@@ -18,7 +18,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-export function OrderRowActions({ order, customers }: { order: any; customers: any[] }) {
+export function OrderRowActions({ order, customers, channels }: { order: any; customers: any[]; channels: any[] }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -67,6 +67,7 @@ export function OrderRowActions({ order, customers }: { order: any; customers: a
       <OrderDialog 
         order={order} 
         customers={customers}
+        channels={channels}
         open={isEditOpen} 
         onOpenChange={setIsEditOpen} 
       />

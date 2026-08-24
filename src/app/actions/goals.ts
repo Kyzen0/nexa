@@ -38,6 +38,12 @@ export async function updateGoal(id: string, formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const { data: currentGoal } = await supabase
+    .from('goals')
+    .select('status, workspace_id')
+    .eq('id', id)
+    .single();
+
   const { error } = await supabase
     .from('goals')
     .update({
@@ -52,6 +58,20 @@ export async function updateGoal(id: string, formData: FormData) {
     .eq('id', id);
 
   if (error) throw new Error(error.message);
+
+  if (currentGoal) {
+    const newStatus = formData.get("status") as string;
+    if (newStatus === "Achieved" && currentGoal.status !== "Achieved") {
+      await supabase.from('notifications').insert([{
+        workspace_id: currentGoal.workspace_id,
+        title: `Goal achieved: ${formData.get("title")}`,
+        description: "Congratulations! A milestone has been reached.",
+        type: "success",
+        badge_text: "Milestone",
+        is_read: false
+      }]);
+    }
+  }
 
   revalidatePath('/dashboard', 'layout');
   return { success: true };
