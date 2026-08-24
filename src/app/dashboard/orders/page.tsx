@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { OrderAddButton } from "@/components/dashboard/orders/order-add-button";
-import { OrderRowActions } from "@/components/dashboard/orders/order-row-actions";
+import { OrderDirectory } from "@/components/dashboard/orders/order-directory";
 
 export default async function OrdersPage() {
   const supabase = await createClient();
@@ -89,107 +89,8 @@ export default async function OrdersPage() {
           <OrderAddButton customers={customers} />
         </div>
       </div>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-4">
-          <div>
-            <CardTitle className="text-sm font-semibold">
-              All Orders
-            </CardTitle>
-            <CardDescription>
-              Complete transaction history
-            </CardDescription>
-          </div>
-        </CardHeader>
-
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-y border-border/80 bg-muted/20 text-muted-foreground">
-                  <th className="py-2.5 px-4 font-medium">Order ID</th>
-                  <th className="py-2.5 px-4 font-medium hidden sm:table-cell">Customer</th>
-                  <th className="py-2.5 px-4 font-medium">Channel</th>
-                  <th className="py-2.5 px-4 font-medium">Amount</th>
-                  <th className="py-2.5 px-4 font-medium">Status</th>
-                  <th className="py-2.5 px-4 font-medium">Date</th>
-                  <th className="py-2.5 px-4 font-medium text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                {orders.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="py-16 text-center">
-                      <div className="flex flex-col items-center justify-center space-y-3">
-                        <ShoppingCart className="size-8 text-muted-foreground/30" />
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium text-foreground">No orders yet</p>
-                          <p className="text-xs text-muted-foreground max-w-[250px] mx-auto leading-relaxed">
-                            Record your first order to start generating revenue and tracking fulfillment.
-                          </p>
-                        </div>
-                        <div className="pt-2">
-                          <OrderAddButton customers={customers} />
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  orders.map((order) => {
-                    const orderDataToClient = {
-                      id: order.id,
-                      customer_id: order.customer_id,
-                      channel: order.channel,
-                      amount: order.amount,
-                      status: order.status
-                    };
-                    
-                    return (
-                      <tr
-                        key={order.id}
-                        className="hover:bg-muted/30 transition-colors"
-                      >
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2">
-                            <ShoppingCart className="size-3.5 text-muted-foreground shrink-0" />
-                            <div className="font-mono text-[11px] text-foreground">
-                              {order.displayId}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4 font-medium text-foreground hidden sm:table-cell">
-                          {order.customer}
-                        </td>
-                        <td className="py-3 px-4 text-muted-foreground">
-                          {order.channel}
-                        </td>
-                        <td className="py-3 px-4 font-mono font-medium text-foreground">
-                          {order.formattedAmount}
-                        </td>
-                        <td className="py-3 px-4">
-                          <Badge
-                            variant={order.badgeVariant}
-                            size="sm"
-                            className="font-medium"
-                          >
-                            {order.status}
-                          </Badge>
-                        </td>
-                        <td className="py-3 px-4 text-muted-foreground font-mono text-[11px]">
-                          {order.date}
-                        </td>
-                        <td className="py-3 px-4 text-right">
-                          <OrderRowActions order={orderDataToClient} customers={customers} />
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Orders Directory Table */}
+      <OrderDirectory orders={orders} customers={customers} />
     </div>
   );
 }

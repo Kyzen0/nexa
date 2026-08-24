@@ -126,6 +126,7 @@ export function DashboardShell({ children, unreadCount = 0, activeGoalsCount = 0
   const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const supabase = createClient();
 
@@ -140,7 +141,10 @@ export function DashboardShell({ children, unreadCount = 0, activeGoalsCount = 0
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setCommandPaletteOpen((prev) => !prev);
+        setCommandPaletteOpen((prev) => {
+          if (!prev) setSearchQuery(""); // Reset search on open
+          return !prev;
+        });
       }
       if (e.key === "Escape") {
         setCommandPaletteOpen(false);
@@ -539,7 +543,10 @@ export function DashboardShell({ children, unreadCount = 0, activeGoalsCount = 0
       {commandPaletteOpen && (
         <div
           className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-black/60 backdrop-blur-xs p-4 animate-in fade-in-0 duration-150"
-          onClick={() => setCommandPaletteOpen(false)}
+          onClick={() => {
+            setCommandPaletteOpen(false);
+            setSearchQuery("");
+          }}
         >
           <div
             className="w-full max-w-lg rounded-xl border border-border bg-card shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150"
@@ -552,6 +559,8 @@ export function DashboardShell({ children, unreadCount = 0, activeGoalsCount = 0
                 placeholder="Type a command or navigate to a section..."
                 className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                 autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
               <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
                 ESC
@@ -559,58 +568,103 @@ export function DashboardShell({ children, unreadCount = 0, activeGoalsCount = 0
             </div>
 
             <div className="max-h-80 overflow-y-auto p-2 space-y-1">
-              <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Dashboard Navigation
-              </div>
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setCommandPaletteOpen(false)}
-                    className="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium text-foreground hover:bg-muted transition-colors group"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Icon className="size-4 text-muted-foreground group-hover:text-foreground" />
-                      <span>{item.title}</span>
-                    </div>
-                    <span className="font-mono text-[10px] text-muted-foreground group-hover:text-foreground">
-                      {item.href}
-                    </span>
-                  </Link>
+              {(() => {
+                const q = searchQuery.toLowerCase();
+                const filteredNav = navItems.filter((item) =>
+                  item.title.toLowerCase().includes(q)
                 );
-              })}
+                const quickActions = [
+                  {
+                    title: "Generate Revenue Forecast",
+                    href: "/dashboard/ai-command",
+                    icon: Zap,
+                    badge: "AI Action",
+                    iconColor: "text-amber-500",
+                  },
+                  {
+                    title: "Export Monthly Financial Summary",
+                    href: "/dashboard/reports",
+                    icon: FileText,
+                    badge: "Report",
+                    iconColor: "text-indigo-500",
+                  },
+                ];
+                const filteredActions = quickActions.filter((action) =>
+                  action.title.toLowerCase().includes(q)
+                );
 
-              <div className="pt-2 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground border-t border-border/50">
-                Quick Actions
-              </div>
-              <Link
-                href="/dashboard/ai-command"
-                onClick={() => setCommandPaletteOpen(false)}
-                className="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium text-foreground hover:bg-muted transition-colors group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <Zap className="size-4 text-amber-500" />
-                  <span>Generate Revenue Forecast</span>
-                </div>
-                <Badge variant="outline" size="sm">
-                  AI Action
-                </Badge>
-              </Link>
-              <Link
-                href="/dashboard/reports"
-                onClick={() => setCommandPaletteOpen(false)}
-                className="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium text-foreground hover:bg-muted transition-colors group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <FileText className="size-4 text-indigo-500" />
-                  <span>Export Monthly Financial Summary</span>
-                </div>
-                <Badge variant="outline" size="sm">
-                  Report
-                </Badge>
-              </Link>
+                if (filteredNav.length === 0 && filteredActions.length === 0) {
+                  return (
+                    <div className="py-6 text-center text-sm text-muted-foreground">
+                      No results found for &quot;<span className="text-foreground">{searchQuery}</span>&quot;
+                    </div>
+                  );
+                }
+
+                return (
+                  <>
+                    {filteredNav.length > 0 && (
+                      <>
+                        <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                          Dashboard Navigation
+                        </div>
+                        {filteredNav.map((item) => {
+                          const Icon = item.icon;
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              onClick={() => {
+                                setCommandPaletteOpen(false);
+                                setSearchQuery("");
+                              }}
+                              className="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium text-foreground hover:bg-muted transition-colors group"
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <Icon className="size-4 text-muted-foreground group-hover:text-foreground" />
+                                <span>{item.title}</span>
+                              </div>
+                              <span className="font-mono text-[10px] text-muted-foreground group-hover:text-foreground">
+                                {item.href}
+                              </span>
+                            </Link>
+                          );
+                        })}
+                      </>
+                    )}
+
+                    {filteredActions.length > 0 && (
+                      <>
+                        <div className={cn("px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground", filteredNav.length > 0 && "pt-2 border-t border-border/50 mt-1")}>
+                          Quick Actions
+                        </div>
+                        {filteredActions.map((action) => {
+                          const Icon = action.icon;
+                          return (
+                            <Link
+                              key={action.title}
+                              href={action.href}
+                              onClick={() => {
+                                setCommandPaletteOpen(false);
+                                setSearchQuery("");
+                              }}
+                              className="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium text-foreground hover:bg-muted transition-colors group"
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <Icon className={cn("size-4", action.iconColor)} />
+                                <span>{action.title}</span>
+                              </div>
+                              <Badge variant="outline" size="sm">
+                                {action.badge}
+                              </Badge>
+                            </Link>
+                          );
+                        })}
+                      </>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>
