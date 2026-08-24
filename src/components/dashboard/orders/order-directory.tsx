@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { OrderAddButton } from "@/components/dashboard/orders/order-add-button";
 import { OrderRowActions } from "@/components/dashboard/orders/order-row-actions";
+import { Button } from "@/components/ui/button";
 
 interface OrderData {
   id: string;
@@ -23,6 +24,8 @@ interface OrderData {
 
 export function OrderDirectory({ orders, customers }: { orders: OrderData[], customers: any[] }) {
   const [query, setQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   const filteredOrders = orders.filter((order) => {
     if (!query) return true;
@@ -30,6 +33,12 @@ export function OrderDirectory({ orders, customers }: { orders: OrderData[], cus
     // Orders filter by customer name + order ID
     return order.customer.toLowerCase().includes(q) || order.id.toLowerCase().includes(q);
   });
+
+  const totalPages = Math.ceil(filteredOrders.length / pageSize);
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   return (
     <Card>
@@ -50,7 +59,10 @@ export function OrderDirectory({ orders, customers }: { orders: OrderData[], cus
               placeholder="Search by customer or order ID..."
               className="pl-8 text-xs"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setCurrentPage(1);
+              }}
             />
           </div>
         </div>
@@ -95,7 +107,7 @@ export function OrderDirectory({ orders, customers }: { orders: OrderData[], cus
                   </td>
                 </tr>
               ) : (
-                filteredOrders.map((order) => {
+                paginatedOrders.map((order) => {
                   const orderDataToClient = {
                     id: order.id,
                     customer_id: order.customer_id,
@@ -141,6 +153,34 @@ export function OrderDirectory({ orders, customers }: { orders: OrderData[], cus
             </tbody>
           </table>
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-muted/10">
+            <div className="text-[11px] text-muted-foreground font-medium">
+              Page {currentPage} of {totalPages}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-[11px]"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-[11px]"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

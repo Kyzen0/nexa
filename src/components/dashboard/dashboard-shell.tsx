@@ -166,9 +166,9 @@ export function DashboardShell({ children, unreadCount = 0, activeGoalsCount = 0
   ];
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground selection:bg-neutral-800 selection:text-neutral-100">
+    <div className="flex h-screen overflow-hidden bg-background text-foreground selection:bg-neutral-800 selection:text-neutral-100">
       {/* Desktop Fixed Sidebar */}
-      <aside className="hidden lg:flex w-64 flex-col border-r border-border bg-card/60 backdrop-blur-md shrink-0 select-none">
+      <aside className="hidden lg:flex w-64 h-full flex-col border-r border-border bg-card/60 backdrop-blur-md shrink-0 select-none">
         {/* Workspace Brand / Org Switcher */}
         <div className="flex h-14 items-center justify-between border-b border-border px-4">
           <Link

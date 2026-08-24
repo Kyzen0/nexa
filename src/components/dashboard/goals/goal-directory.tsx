@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { GoalAddButton } from "@/components/dashboard/goals/goal-add-button";
 import { GoalCardActions } from "@/components/dashboard/goals/goal-card-actions";
+import { Button } from "@/components/ui/button";
 
 interface GoalData {
   id: string;
@@ -22,6 +23,8 @@ interface GoalData {
 
 export function GoalDirectory({ goals }: { goals: GoalData[] }) {
   const [query, setQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 6;
 
   const filteredGoals = goals.filter((goal) => {
     if (!query) return true;
@@ -29,6 +32,12 @@ export function GoalDirectory({ goals }: { goals: GoalData[] }) {
     // Goals filter by title + category
     return goal.title.toLowerCase().includes(q) || goal.category.toLowerCase().includes(q);
   });
+
+  const totalPages = Math.ceil(filteredGoals.length / pageSize);
+  const paginatedGoals = filteredGoals.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   if (goals.length === 0) {
     return (
@@ -56,7 +65,10 @@ export function GoalDirectory({ goals }: { goals: GoalData[] }) {
             placeholder="Search goals or category..."
             className="pl-8 text-xs"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setCurrentPage(1);
+            }}
           />
         </div>
       </div>
@@ -68,59 +80,89 @@ export function GoalDirectory({ goals }: { goals: GoalData[] }) {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {filteredGoals.map((goal) => (
-            <Card key={goal.id} className="hover:border-neutral-400 dark:hover:border-neutral-700 transition-colors">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                      {goal.category}
-                    </span>
-                    <CardTitle className="text-sm font-semibold mt-1 pr-6">
-                      {goal.title}
-                    </CardTitle>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {paginatedGoals.map((goal) => (
+              <Card key={goal.id} className="hover:border-neutral-400 dark:hover:border-neutral-700 transition-colors">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                        {goal.category}
+                      </span>
+                      <CardTitle className="text-sm font-semibold mt-1 pr-6">
+                        {goal.title}
+                      </CardTitle>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={goal.badgeVariant} size="sm">
+                        {goal.status}
+                      </Badge>
+                      <GoalCardActions goal={{
+                        id: goal.id,
+                        title: goal.title,
+                        category: goal.category,
+                        target: goal.target,
+                        current: goal.current,
+                        progress: goal.progress,
+                        status: goal.status,
+                        deadline: goal.deadline,
+                      }} />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={goal.badgeVariant} size="sm">
-                      {goal.status}
-                    </Badge>
-                    <GoalCardActions goal={{
-                      id: goal.id,
-                      title: goal.title,
-                      category: goal.category,
-                      target: goal.target,
-                      current: goal.current,
-                      progress: goal.progress,
-                      status: goal.status,
-                      deadline: goal.deadline,
-                    }} />
+                </CardHeader>
+    
+                <CardContent className="space-y-3">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs font-mono">
+                      <span className="text-muted-foreground">Current: {goal.current}</span>
+                      <span className="font-semibold text-foreground">Target: {goal.target}</span>
+                    </div>
+                    {/* Progress bar container */}
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full bg-foreground transition-all duration-300"
+                        style={{ width: `${goal.progress}%` }}
+                      />
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-  
-              <CardContent className="space-y-3">
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-muted-foreground">Current: {goal.current}</span>
-                    <span className="font-semibold text-foreground">Target: {goal.target}</span>
+    
+                  <div className="flex items-center justify-between text-[11px] text-muted-foreground font-mono pt-1">
+                    <span>Milestone: {goal.deadline}</span>
+                    <span>{goal.progress}% Complete</span>
                   </div>
-                  {/* Progress bar container */}
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full bg-foreground transition-all duration-300"
-                      style={{ width: `${goal.progress}%` }}
-                    />
-                  </div>
-                </div>
-  
-                <div className="flex items-center justify-between text-[11px] text-muted-foreground font-mono pt-1">
-                  <span>Milestone: {goal.deadline}</span>
-                  <span>{goal.progress}% Complete</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between py-2">
+              <div className="text-[11px] text-muted-foreground font-medium pl-1">
+                Page {currentPage} of {totalPages}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-[11px]"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-[11px]"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

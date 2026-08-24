@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ReportAddButton } from "@/components/dashboard/reports/report-add-button";
 import { ReportRowActions } from "@/components/dashboard/reports/report-row-actions";
+import { Button } from "@/components/ui/button";
 
 interface ReportData {
   id: string;
@@ -21,6 +22,8 @@ interface ReportData {
 
 export function ReportDirectory({ reports }: { reports: ReportData[] }) {
   const [query, setQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   const filteredReports = reports.filter((report) => {
     if (!query) return true;
@@ -28,6 +31,12 @@ export function ReportDirectory({ reports }: { reports: ReportData[] }) {
     // Reports filter by title + period
     return report.title.toLowerCase().includes(q) || report.period.toLowerCase().includes(q);
   });
+
+  const totalPages = Math.ceil(filteredReports.length / pageSize);
+  const paginatedReports = filteredReports.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   return (
     <Card>
@@ -51,7 +60,10 @@ export function ReportDirectory({ reports }: { reports: ReportData[] }) {
               placeholder="Search reports or period..."
               className="pl-8 text-xs"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setCurrentPage(1);
+              }}
             />
           </div>
         </div>
@@ -94,7 +106,7 @@ export function ReportDirectory({ reports }: { reports: ReportData[] }) {
                   </td>
                 </tr>
               ) : (
-                filteredReports.map((report) => (
+                paginatedReports.map((report) => (
                   <tr key={report.id} className="hover:bg-muted/30 transition-colors">
                     <td className="py-3 px-4">
                       <div className="font-semibold text-foreground flex items-center gap-2">
@@ -131,6 +143,34 @@ export function ReportDirectory({ reports }: { reports: ReportData[] }) {
             </tbody>
           </table>
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-muted/10">
+            <div className="text-[11px] text-muted-foreground font-medium">
+              Page {currentPage} of {totalPages}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-[11px]"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-[11px]"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { CustomerAddButton } from "@/components/dashboard/customers/customer-add-button";
 import { CustomerRowActions } from "@/components/dashboard/customers/customer-row-actions";
+import { Button } from "@/components/ui/button";
 
 interface CustomerData {
   id: string;
@@ -23,12 +24,20 @@ interface CustomerData {
 
 export function CustomerDirectory({ customers }: { customers: CustomerData[] }) {
   const [query, setQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   const filteredCustomers = customers.filter((org) => {
     if (!query) return true;
     const q = query.toLowerCase();
     return org.name.toLowerCase().includes(q) || org.contact.toLowerCase().includes(q);
   });
+
+  const totalPages = Math.ceil(filteredCustomers.length / pageSize);
+  const paginatedCustomers = filteredCustomers.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   return (
     <Card>
@@ -49,7 +58,10 @@ export function CustomerDirectory({ customers }: { customers: CustomerData[] }) 
               placeholder="Search customers or email..."
               className="pl-8 text-xs"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setCurrentPage(1);
+              }}
             />
           </div>
         </div>
@@ -94,7 +106,7 @@ export function CustomerDirectory({ customers }: { customers: CustomerData[] }) 
                   </td>
                 </tr>
               ) : (
-                filteredCustomers.map((org) => (
+                paginatedCustomers.map((org) => (
                   <tr key={org.id} className="hover:bg-muted/30 transition-colors">
                     <td className="py-3 px-4">
                       <div className="font-semibold text-foreground flex items-center gap-2">
@@ -131,6 +143,34 @@ export function CustomerDirectory({ customers }: { customers: CustomerData[] }) 
             </tbody>
           </table>
         </div>
+        
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-muted/10">
+            <div className="text-[11px] text-muted-foreground font-medium">
+              Page {currentPage} of {totalPages}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-[11px]"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-[11px]"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
