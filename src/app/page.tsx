@@ -368,10 +368,16 @@ export default function LandingPage() {
             <div className="flex size-6 items-center justify-center rounded-md bg-foreground text-background font-bold text-[10px]">
               NX
             </div>
-            <span>© 2026 Nexa Systems Inc. All rights reserved.</span>
+            <span>© 2026 Zyne. All rights reserved.</span>
           </div>
 
           <div className="flex items-center gap-6 font-medium">
+            <Link href="/terms" className="hover:text-foreground transition-colors">
+              Terms
+            </Link>
+            <Link href="/privacy" className="hover:text-foreground transition-colors">
+              Privacy
+            </Link>
             <a href="#features" className="hover:text-foreground transition-colors">
               Platform
             </a>
@@ -380,9 +386,6 @@ export default function LandingPage() {
             </a>
             <Link href="/dashboard" className="hover:text-foreground transition-colors">
               Console
-            </Link>
-            <Link href="/dashboard/settings" className="hover:text-foreground transition-colors">
-              Settings
             </Link>
           </div>
         </div>

@@ -215,6 +215,10 @@ export default function SignupPage() {
                 </div>
               )}
 
+              <p className="text-[11px] text-muted-foreground text-center pt-2">
+                By signing up, you agree to our <Link href="/terms" className="underline hover:text-foreground transition-colors">Terms of Service</Link> and <Link href="/privacy" className="underline hover:text-foreground transition-colors">Privacy Policy</Link>.
+              </p>
+
               <Button type="submit" className="w-full h-10 mt-2 text-[13px] font-medium" disabled={loading || !isFormValid}>
                 {loading ? "Creating account..." : "Sign Up"}
               </Button>
